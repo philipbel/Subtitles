@@ -1,0 +1,10 @@
+sudo: false
+languge: python
+python:
+  - "3.6"
+before_install:
+  - pip install --upgrade pip
+  - pip install pipenv
+  - pipenv update
+script:
+  - pyinstaller -y Subtitles.pyinstaller.spec
