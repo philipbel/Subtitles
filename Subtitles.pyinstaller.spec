@@ -4,6 +4,7 @@ from PyInstaller.utils.hooks import collect_dynamic_libs
 
 import os
 import sys
+import re
 from os import path
 
 block_cipher = None
@@ -14,7 +15,11 @@ RESOURCES_DIR = '.'
 
 # From https://github.com/spesmilo/electrum/blob/master/contrib/build-osx/osx.spec
 # Workaround for "Retro Look":
-binaries = [b for b in collect_dynamic_libs('PyQt5') if 'macstyle' in b[0]]
+binaries = []
+for b in collect_dynamic_libs('PyQt5'):
+    if re.match(r'.*style\..*', b[0]):
+        print('*** Adding Qt5 Style {}'.format(b[0]))
+        binaries.append(b)
 
 a = Analysis([
     path.join(path.abspath('.'), 'main.py')
