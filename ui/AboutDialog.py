@@ -1,9 +1,11 @@
 import re
+import sys
 from PyQt5.Qt import (
-    Qt, QIcon, PYQT_VERSION_STR, pyqtSlot, QDesktopServices, QUrl
+    Qt, QIcon, PYQT_VERSION_STR, pyqtSlot, QDesktopServices, QUrl,
+    QFrame, QSizePolicy
 )
 from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
+    QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QDialogButtonBox
 )
 from Application import Application
 from .TextDialog import TextDialog
@@ -72,6 +74,23 @@ class AboutDialog(QDialog):
         layout.addWidget(linkLabel)
         layout.addSpacing(10)
         layout.addLayout(buttonLayout)
+
+        if sys.platform != 'darwin':
+            buttonBox = QDialogButtonBox(QDialogButtonBox.Close)
+            buttonBox.button(QDialogButtonBox.Close).clicked.connect(
+                self.reject
+            )
+
+            line = QFrame()
+            # line.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
+            line.setFrameShape(QFrame.HLine)
+            line.setFrameShadow(QFrame.Sunken)
+
+            layout.addSpacing(8)
+            layout.addWidget(line)
+            layout.addSpacing(8)
+            layout.addWidget(buttonBox)
+
 
     @pyqtSlot()
     def showAcknowledgements(self):
