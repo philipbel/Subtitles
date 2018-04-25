@@ -1,12 +1,12 @@
 import shutil
 import os
-import requests
 import gzip
 import ui.worker
+import sys
 from os import path
 from PyQt5.Qt import (
     Qt, QThreadPool, QMainWindow, QErrorMessage, pyqtSlot, QAction,
-    QApplication, QMimeType, QMimeDatabase
+    QApplication, QMimeType, QMimeDatabase, QKeySequence, QMenu
 )
 from PyQt5.QtWidgets import (
     QLabel, QWidget, QVBoxLayout, QFileDialog
@@ -52,20 +52,38 @@ class MainWindow(QMainWindow):
         self.setAcceptDrops(True)
 
     def _initMenu(self):
-        # self._menuBar = QMenuBar(parent=None)
-        # self.setMenuBar(self._menuBar)
-
         mb = self.menuBar()
         fileMenu = mb.addMenu(self.tr("&File"))
         openMovieAction = fileMenu.addAction(self.tr("&Open Movie..."))
         openMovieAction.triggered.connect(self.showOpenFile)
-        openMovieAction.setShortcut(Qt.CTRL | Qt.Key_O)
-        fileMenu.addAction(self.tr("about")).triggered.connect(self.showAbout)
-        fileMenu.addAction(self.tr("config")).triggered.connect(
-            self.showPreferences)
+        openMovieAction.setShortcut(QKeySequence.Open)
+
+        if sys.platform == 'darwin':
+            quitAction = mb.addAction("quit")
+            aboutAction = mb.addMenu("about")
+            preferencesAction = mb.addMenu("preferences")
+        else:
+            ABOUT_ACTION = "&About"
+            if sys.platform == 'win32':
+                PREFERENCES_ACTION = self.tr("&Options")
+                QUIT_ACTION = self.tr("Exit")
+            else:
+                PREFERENCES_ACTION = self.tr("&Preferences")
+                QUIT_ACTION = self.tr("Quit")
+            editMenu = mb.addMenu(self.tr("&Edit"))
+            preferencesAction = editMenu.addAction(PREFERENCES_ACTION)
+
+            quitAction = fileMenu.addAction(QUIT_ACTION)
+
+            helpMenu = mb.addMenu(self.tr("Help"))
+            aboutAction = helpMenu.addAction(ABOUT_ACTION)
+
+        aboutAction.triggered.connect(self.showAbout)
+        preferencesAction.triggered.connect(self.showPreferences)
         # Work around QTBUG-65245
-        fileMenu.addAction(self.tr("quit")).triggered.connect(
-            QApplication.instance().quit)
+        quitAction.setShortcut(QKeySequence.Quit)
+        quitAction.triggered.connect(QApplication.instance().quit)
+
 
     @pyqtSlot()
     def showOpenFile(self):
