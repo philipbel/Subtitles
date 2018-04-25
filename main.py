@@ -3,6 +3,7 @@ import sys
 import signal
 import log
 import PyQt5
+from PyQt5.Qt import QSettings
 from PyQt5.QtWidgets import QDesktopWidget
 from log import logger
 from Application import Application
