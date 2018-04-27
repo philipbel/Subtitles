@@ -7,6 +7,7 @@ name = "pypi"
 injector = "*"
 "pyqt5" = "*"
 python-opensubtitles = {git = "https://github.com/agonzalezro/python-opensubtitles.git"}
+requests = "*"
 
 [dev-packages]
 "autopep8" = "*"
