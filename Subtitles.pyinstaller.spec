@@ -5,12 +5,26 @@ from PyInstaller.utils.hooks import collect_dynamic_libs
 import os
 import sys
 import re
+from string import Template
 from os import path
 
 block_cipher = None
 
 # Defaults to .app/Contents/Resources on macOS
 RESOURCES_DIR = '.'
+
+with open('doc/VERSION', 'rb') as f:
+    VERSION = str(f.read(), encoding='ascii').strip()
+
+
+def write_subst_file(in_filename, out_filename, subst_dict):
+    with open(in_filename, 'rb') as in_file, \
+            open(out_filename, 'wb') as out_filename:
+        templ = Template(str(in_file.read(), encoding='utf-8'))
+        result = templ.safe_substitute(subst_dict)
+        out_filename.write(result.encode())
+
+        print("Substitute: {} -> {}".format(in_filename, out_filename))
 
 
 # From https://github.com/spesmilo/electrum/blob/master/contrib/build-osx/osx.spec
@@ -28,13 +42,12 @@ a = Analysis([
     datas=[
         ('doc/VERSION', RESOURCES_DIR),
         ('doc/ACKNOWLEDGEMENTS.html', RESOURCES_DIR),
-        ('doc/VERSION', RESOURCES_DIR),
         ('doc/LICENSE.PyQt5', RESOURCES_DIR),
         ('LICENSE',  RESOURCES_DIR),
         ('resources/Subtitles.png', RESOURCES_DIR), ],
     hiddenimports=[
         'pythonopensubtitles'
-    ],
+],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
@@ -49,20 +62,32 @@ exe = EXE(pyz,
           exclude_binaries=True,
           name='Subtitles',
           debug=False,
-          strip=False,
+          strip=True,
           upx=True,
           console=False)
+
+if sys.platform == 'win32':
+    icon = 'resources/Subtitles.ico'
+elif sys.platform == 'darwin':
+    icon = 'resources/Subtitles.icns'
+else:
+    icon = 'resources/Subtitles.png'
+
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
                strip=False,
                upx=True,
-               name='Subtitles')
-app = BUNDLE(coll,
-             name='Subtitles.app',
-             icon='resources/Subtitles.icns',
-             bundle_identifier='io.github.philipbel.subtitles',
-             info_plist={
-                 'NSHighResolutionCapable': 'True'
-             })
+               name='Subtitles',
+               icon=icon)
+
+if sys.platform == 'darwin':
+    app = BUNDLE(coll, name='Subtitles.app', icon=icon)
+    write_subst_file(
+        in_filename='resources/Info.plist.in',
+        out_filename=path.join(app.name, 'Contents/Info.plist'),
+        subst_dict=dict(
+            VERSION=VERSION
+        )
+    )
