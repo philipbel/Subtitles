@@ -24,7 +24,7 @@ from log import logger
 from functools import partial
 from tempfile import NamedTemporaryFile
 
-PROG = 'SubFinder'
+PROG = 'Subtitles'
 
 
 class MainWindow(QMainWindow):
@@ -46,7 +46,7 @@ class MainWindow(QMainWindow):
         self._initMenu()
 
         self.setCentralWidget(self._instructionWidget)
-        self.setWindowTitle('SubFinder')
+        self.setWindowTitle(self.tr(PROG))
         self.setUnifiedTitleAndToolBarOnMac(True)
         self.resize(320, 240)
         self.setAcceptDrops(True)
