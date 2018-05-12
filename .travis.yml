@@ -16,8 +16,8 @@ env:
 
 # See https://github.com/pypa/pip/issues/5236
 before_install:
-    - which pip
-    - which pip3
+    - echo $(which pip)
+    - echo $(which pip3)
     - |
       if [ "$TRAVIS_OS_NAME" = "linux" ]; then
         sudo pip install --upgrade pip
