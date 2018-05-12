@@ -54,3 +54,8 @@ script:
 #   on:
 #     repo: philipbel/Subtitles
 #     # branch: release
+
+
+addons:
+  apt:
+    update: true

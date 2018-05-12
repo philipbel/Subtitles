@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d4e577c7ba0721cb23887957cf4391f4e249d77c9e69cc3bb4acbcabcab17646"
+            "sha256": "be8e5e94d553281309a6f7dae5ac1ebdb13722d6ac9af5e6b2b85413939f1b1b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -159,8 +159,6 @@
         },
         "pycodestyle": {
             "hashes": [
-                "sha256:1ec08a51c901dfe44921576ed6e4c1f5b7ecbad403f871397feedb5eb8e4fa14",
-                "sha256:5ff2fbcbab997895ba9ead77e1b38b3ebc2e5c3b8a6194ef918666e4c790a00e",
                 "sha256:682256a5b318149ca0d2a9185d365d8864a768a28db66a84a2ea946bcc426766",
                 "sha256:6c4245ade1edfad79c3446fadfc96b0de2759662dc29d07d80a6f27ad1ca6ba9"
             ],
@@ -200,6 +198,8 @@
                 "sha256:f0f0e7c82ee334dd6e888b9b5beb05fd8947355fa7a15644c810bb4ea0079ca6",
                 "sha256:fb3c85907918fd01a72ee146d323d220771dee151c0cfa5630c2f35797ffb116"
             ],
+            "index": "pypi",
+            "markers": "sys_platform == 'win32'",
             "version": "==223"
         },
         "rope": {
