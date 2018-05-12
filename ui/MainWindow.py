@@ -3,6 +3,7 @@ import os
 import gzip
 import ui.worker
 import sys
+import requests
 from os import path
 from PyQt5.Qt import (
     Qt, QThreadPool, QMainWindow, QErrorMessage, pyqtSlot, QAction,
@@ -83,7 +84,6 @@ class MainWindow(QMainWindow):
         # Work around QTBUG-65245
         quitAction.setShortcut(QKeySequence.Quit)
         quitAction.triggered.connect(QApplication.instance().quit)
-
 
     @pyqtSlot()
     def showOpenFile(self):
