@@ -14,20 +14,18 @@ env:
   global:
   - PIPENV_VENV_IN_PROJECT=1
 
-# # See https://github.com/pypa/pip/issues/5236
-# before_install:
-#     - which pip
-#     - |
-#       if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-#         sudo pip install --upgrade pip
-#       fi
-#     - |
-#       if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-#         # curl https://bootstrap.pypa.io/get-pip.py | python
-#         pip install --upgrade --user pip
-#       fi
-#     - pip install --user pipenv
-#     - pipenv install --dev
+# See https://github.com/pypa/pip/issues/5236
+before_install:
+    - which pip
+    - |
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+        sudo pip install --upgrade pip
+      elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        # curl https://bootstrap.pypa.io/get-pip.py | python
+        pip install --upgrade --user pip
+      fi
+    - pip install --user pipenv
+    - pipenv install --dev
 
 script:
 - pipenv run pyinstaller -y Subtitles.pyinstaller.spec
