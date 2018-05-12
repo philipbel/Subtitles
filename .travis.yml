@@ -13,6 +13,7 @@ matrix:
 env:
   global:
   - PIPENV_VENV_IN_PROJECT=1
+  - PIPENV_IGNORE_VIRTUALENVS=1
 
 # See https://github.com/pypa/pip/issues/5236
 before_install:
@@ -21,10 +22,11 @@ before_install:
       if [ "$TRAVIS_OS_NAME" = "linux" ]; then
         sudo pip install --upgrade pip
       elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        brew update
         # curl https://bootstrap.pypa.io/get-pip.py | python
         pip install --upgrade --user pip
       fi
-    - pip install --user pipenv
+    - pip install pipenv
     - pipenv install --dev
 
 script:
