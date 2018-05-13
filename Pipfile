@@ -1,15 +1,20 @@
 [[source]]
+
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
+
 [packages]
+
 injector = "*"
 "pyqt5" = "*"
 python-opensubtitles = {git = "https://github.com/agonzalezro/python-opensubtitles.git"}
 requests = "*"
 
+
 [dev-packages]
+
 "autopep8" = "*"
 nose = "*"
 rope = "*"
@@ -17,6 +22,9 @@ pyinstaller = "*"
 "flake8" = "*"
 "pywin32" = { version = "*", sys_platform = "== 'win32'" }
 "pypiwin32" = { version = "*", sys_platform = "== 'win32'" }
+dmgbuild = { version = "*", sys_platform = "== 'darwin'" }
+
 
 [requires]
+
 python_version = "3.6"

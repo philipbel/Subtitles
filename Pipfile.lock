@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "be8e5e94d553281309a6f7dae5ac1ebdb13722d6ac9af5e6b2b85413939f1b1b"
+            "sha256": "e373cacb3b59b6344c67b906f1cc94937ffe698eb276122700e100433d52ea48"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -114,6 +114,26 @@
             "index": "pypi",
             "version": "==1.3.5"
         },
+        "biplist": {
+            "hashes": [
+                "sha256:4c0549764c5fe50b28042ec21aa2e14fe1a2224e239a1dae77d9e7f3932aa4c6"
+            ],
+            "version": "==1.0.3"
+        },
+        "dmgbuild": {
+            "hashes": [
+                "sha256:abc5d32cfc31e1585adba7920c4258c9dc3034d14196fc03e86dbe9ebce5b985"
+            ],
+            "index": "pypi",
+            "markers": "sys_platform == 'darwin'",
+            "version": "==1.3.2"
+        },
+        "ds-store": {
+            "hashes": [
+                "sha256:f569659cfd66b21273c5a2405d5e1e0f54fddebf627130329f01404f271a074c"
+            ],
+            "version": "==1.1.2"
+        },
         "flake8": {
             "hashes": [
                 "sha256:7253265f7abd8b313e3892944044a365e3f4ac3fcdcfb4298f55ee9ddf188ba0",
@@ -127,6 +147,12 @@
                 "sha256:e39ced1ab767b5936646cedba8bcce582398233d6a627067d4c6a454c90cfedb"
             ],
             "version": "==0.16.0"
+        },
+        "mac-alias": {
+            "hashes": [
+                "sha256:c485e3eb9d600208cc0aa906282f0d575a535395306289bcdb4096599189e223"
+            ],
+            "version": "==2.0.7"
         },
         "macholib": {
             "hashes": [

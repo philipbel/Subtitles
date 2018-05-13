@@ -16,35 +16,41 @@ env:
 
 # See https://github.com/pypa/pip/issues/5236
 before_install:
-    - |
-      if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-        sudo pip install --upgrade pip
-        pip install pipenv
-      elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
-        # echo "Updating brew"
-        # brew update
-        echo "Installing python3"
-        brew upgrade python
-        pip3 install --upgrade pip setuptools wheel
-        pip3 install pipenv
-      fi
-    - pipenv install --dev
+  - |
+    if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      sudo pip install --upgrade pip
+      pip install pipenv
+    elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
+      # echo "Updating brew"
+      # brew update
+      echo "Installing python3"
+      brew upgrade python
+      pip3 install --upgrade pip setuptools wheel
+      pip3 install pipenv
+    fi
+  - pipenv install --dev
 
 script:
-- pipenv run pyinstaller -y Subtitles.pyinstaller.spec
-- ls -lR dist
+  - export VERSION=$(cat doc/VERSION)
+  - pipenv run pyinstaller -y Subtitles.pyinstaller.spec
+  - ls -lR dist
+  - |
+    if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+    elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
+      dmgbuild -s Subtitles.dmgbuild -D app=dist/Subtitles.app "Subtitles-${VERSION}" Subtitles-${VERSION}.dmg
+    fi
 
 
-# before_deploy:
-#   - export VERSION=$(cat doc/VERSION)
-#   - |
-#     case "$TRAVIS_OS_NAME" in
-#     'linux')
-#       export RELEASE_FILE="dist/Subtitles-$VERSION";;
-#     'osx')
-#       export RELEASE_FILE="dist/Subtitles-$VERSION";;
-#     esac
-#   - "echo TODO: Package $RELEASE_FILE"
+before_deploy:
+  - |
+    case "$TRAVIS_OS_NAME" in
+    'linux')
+      local _release="Subtitles-Linux-amd64-$VERSION.tar.gz";;
+      export RELEASE_FILE="dist/Subtitles-Linux-amd64-$VERSION.tar.gz";;
+    'osx')
+      export RELEASE_FILE="dist/Subtitles-$VERSION";;
+    esac
+  - "echo TODO: Package $RELEASE_FILE"
 
 
 # deploy:
