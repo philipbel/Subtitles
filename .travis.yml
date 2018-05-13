@@ -35,7 +35,8 @@ before_install:
         echo $(which pip3)
         echo $(python --version)
         echo $(python3 --version)
-        echo "Installing pip"
+        pip3 install pipenv
+        # echo "Installing pip"
         # curl https://bootstrap.pypa.io/get-pip.py | sudo python
         # pip install --upgrade --user pip
         # pip install --user pipenv
