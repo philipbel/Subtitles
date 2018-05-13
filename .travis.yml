@@ -41,7 +41,10 @@ script:
     elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
       echo "${TRAVIS_BUILD_NUMBER}" > dist/Subtitles.app/Contents/Resources/BUILD
       echo "${TRAVIS_COMMIT}" > dist/Subtitles.app/Contents/Resources/COMMIT
-      dmgbuild -s Subtitles.dmgbuild -D app=dist/Subtitles.app "Subtitles-${VERSION}" Subtitles-${VERSION}.dmg
+      dmgbuild -s Subtitles.dmgbuild \
+        -D app=dist/Subtitles.app \
+        "Subtitles-${VERSION}" \
+        dist/Subtitles-${VERSION}.dmg
     fi
     ls -lR dist
 
@@ -50,10 +53,9 @@ before_deploy:
   - |
     case "$TRAVIS_OS_NAME" in
     'linux')
-      local _release="Subtitles-Linux-amd64-$VERSION.tar.gz";;
-      export RELEASE_FILE="dist/Subtitles-Linux-amd64-$VERSION.tar.gz";;
+      export RELEASE_FILE="dist/Subtitles-Linux-amd64-${VERSION}.tar.gz";;
     'osx')
-      export RELEASE_FILE="dist/Subtitles-$VERSION";;
+      export RELEASE_FILE="dist/Subtitles-${VERSION}.dmg";;
     esac
   - "echo TODO: Package $RELEASE_FILE"
 
