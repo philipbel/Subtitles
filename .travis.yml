@@ -18,8 +18,8 @@ env:
 before_install:
     - echo $(which pip)
     - echo $(which pip3)
-    - python --version; exit 0
-    - python3 --version; exit 0
+    - echo $(python --version)
+    - echo $(python3 --version)
     - |
       if [ "$TRAVIS_OS_NAME" = "linux" ]; then
         sudo pip install --upgrade pip
@@ -32,7 +32,7 @@ before_install:
         echo "Installing pip"
         curl https://bootstrap.pypa.io/get-pip.py | sudo python
         # pip install --upgrade --user pip
-        pip install pipenv
+        pip install --user pipenv
       fi
     - pipenv install --dev
 
