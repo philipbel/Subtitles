@@ -18,9 +18,12 @@ env:
 before_install:
     - echo $(which pip)
     - echo $(which pip3)
+    - python --version; exit 0
+    - python3 --version; exit 0
     - |
       if [ "$TRAVIS_OS_NAME" = "linux" ]; then
         sudo pip install --upgrade pip
+        pip install pipenv
       elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
         # echo "Updating brew"
         # brew update
@@ -29,8 +32,8 @@ before_install:
         echo "Installing pip"
         curl https://bootstrap.pypa.io/get-pip.py | sudo python
         # pip install --upgrade --user pip
+        pip install pipenv
       fi
-    - pip install --user pipenv
     - pipenv install --dev
 
 script:
