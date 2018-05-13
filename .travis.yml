@@ -28,7 +28,12 @@ before_install:
         # echo "Updating brew"
         # brew update
         echo "Installing python3"
-        brew list python3 &>/dev/null || brew install python3
+        brew upgrade python
+        # brew list python3 &>/dev/null || brew install python3
+        echo $(which pip)
+        echo $(which pip3)
+        echo $(python --version)
+        echo $(python3 --version)
         echo "Installing pip"
         curl https://bootstrap.pypa.io/get-pip.py | sudo python
         # pip install --upgrade --user pip
