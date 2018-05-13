@@ -30,7 +30,7 @@ before_install:
         curl https://bootstrap.pypa.io/get-pip.py | sudo python
         # pip install --upgrade --user pip
       fi
-    - pip install pipenv
+    - pip install --user pipenv
     - pipenv install --dev
 
 script:
