@@ -33,7 +33,6 @@ before_install:
 script:
   - export VERSION=$(cat doc/VERSION)
   - pipenv run pyinstaller -y Subtitles.pyinstaller.spec
-  - ls -lR dist
   - |
     if [ "$TRAVIS_OS_NAME" = "linux" ]; then
       echo "${TRAVIS_BUILD_NUMBER}" > dist/Subtitles/BUILD
@@ -46,7 +45,7 @@ script:
         "Subtitles-${VERSION}" \
         dist/Subtitles-${VERSION}.dmg
     fi
-    ls -lR dist
+    ls -l dist
 
 
 before_deploy:
