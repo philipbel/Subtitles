@@ -36,9 +36,14 @@ script:
   - ls -lR dist
   - |
     if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+      echo "${TRAVIS_BUILD_NUMBER}" > dist/Subtitles/BUILD
+      echo "${TRAVIS_COMMIT}" > dist/Subtitles/COMMIT
     elif [ "$TRAVIS_OS_NAME" = "osx" ]; then
+      echo "${TRAVIS_BUILD_NUMBER}" > dist/Subtitles.app/Contents/Resources/BUILD
+      echo "${TRAVIS_COMMIT}" > dist/Subtitles.app/Contents/Resources/COMMIT
       dmgbuild -s Subtitles.dmgbuild -D app=dist/Subtitles.app "Subtitles-${VERSION}" Subtitles-${VERSION}.dmg
     fi
+    ls -lR dist
 
 
 before_deploy:
