@@ -13,6 +13,9 @@ matrix:
           update: true
           packages:
             - nsis
+      env:
+        - PYTHON=python
+          PIP=pip
     - os: osx
       language: generic
       osx_image: xcode10.1
@@ -27,19 +30,21 @@ matrix:
         choco:
           update: true
           packages:
-            - python3
             - nsis
+      script:
+        # See https://chocolatey.org/packages/python3
+        # and https://docs.python.org/3/using/windows.html
+        - choco install python3 --params "/PrependPath=1"
 
 env:
   global:
   - PIPENV_VENV_IN_PROJECT=1
 
 before_install:
-- echo $(which python)
-- echo $(which python3)
-- echo $(python3 --version)
-- echo $(which pip3)
-- echo $(which pip)
+- echo $(which $PYTHON)
+- echo $($PYTHON --version)
+- echo $(which $PIP)
+- echo $($PIP --version)
   # PyInstaller cannot be installed using pip 19.1.
   # See https://github.com/pypa/pip/issues/6163
 - |
