@@ -2,7 +2,6 @@
 
 from PyInstaller.utils.hooks import collect_dynamic_libs
 
-import os
 import sys
 import re
 from string import Template
@@ -42,8 +41,8 @@ a = Analysis([
     datas=[
         ('doc/VERSION', RESOURCES_DIR),
         ('doc/ACKNOWLEDGEMENTS.html', RESOURCES_DIR),
-        ('doc/LICENSE.PyQt5', RESOURCES_DIR),
-        ('LICENSE',  RESOURCES_DIR),
+        # ('doc/LICENSE.PyQt5', RESOURCES_DIR),
+        ('doc/LICENSE.html',  RESOURCES_DIR),
         ('resources/Subtitles.png', RESOURCES_DIR), ],
     hiddenimports=[
         'pythonopensubtitles'

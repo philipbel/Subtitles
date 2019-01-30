@@ -30,18 +30,18 @@ class AboutDialog(QDialog):
         iconLabel.setPixmap(icon.pixmap(64))
         iconLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
-        appNameLabel = QLabel(app.applicationName())
+        appNameLabel = self._createSelectableLabel(app.applicationName())
         appNameLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         appNameLabel.setStyleSheet('font-weight: bold; font-size: 18pt')
 
         versionLabel = self._createVersionLabel()
 
-        licenseLabel = QLabel(
-            '''Copyright © 2018 Philip Belemezov
+        licenseLabel = self._createSelectableLabel(
+            '''Copyright © 2018–2019 Philip Belemezov
             Licensed under the GNU General Public License, version 3''')
         licenseLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
-        linkLabel = QLabel()
+        linkLabel = QLabel(parent=self)
         linkLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         linkLabel.setText(
             '<a href="https://github.io/philipbel/subtitles">https://github.io/philipbel/subtitles</a>')
@@ -91,6 +91,12 @@ class AboutDialog(QDialog):
             layout.addSpacing(8)
             layout.addWidget(buttonBox)
 
+    def _createSelectableLabel(self, text):
+        label = QLabel(parent=self)
+        label.setText(text)
+        label.setTextInteractionFlags(
+            Qt.TextSelectableByKeyboard | Qt.TextSelectableByMouse)
+        return label
 
     @pyqtSlot()
     def showAcknowledgements(self):
@@ -98,39 +104,23 @@ class AboutDialog(QDialog):
         ackFilename = app.findResource('ACKNOWLEDGEMENTS.html')
         if not ackFilename:
             return
-        QDesktopServices.openUrl(QUrl.fromLocalFile(ackFilename))
+        # QDesktopServices.openUrl(QUrl.fromLocalFile(ackFilename))
+        textDialog = TextDialog(parent=self,
+                                title=self.tr("Acknowledgements"),
+                                html_filename=ackFilename)
+        textDialog.exec_()
 
     @pyqtSlot()
     def showLicense(self):
         app = Application.instance()
-        licenseFilename = app.findResource('LICENSE')
+        licenseFilename = app.findResource('LICENSE.html')
         if not licenseFilename:
             return
-        QDesktopServices.openUrl(QUrl.fromLocalFile(licenseFilename))
-
-    def _loadAcknowledgements(self, filename):
-        app = Application.instance()
-
-        text = AboutDialog._readFile(filename)
-        if not text:
-            return
-
-        newText = ''
-
-        for line in text.splitlines():
-            newText += line
-
-            m = AboutDialog.LICENSE_FILE_RE.match(line.strip())
-            if not m:
-                continue
-            licenseFilename = m.group(1)
-            content = AboutDialog._readFile(licenseFilename)
-
-            newText += "<pre>"
-            newText += "<h4>{}</h4>".format(licenseFilename)
-            newText += content
-            newText += "</pre>"
-        return newText
+        # QDesktopServices.openUrl(QUrl.fromLocalFile(licenseFilename))
+        textDialog = TextDialog(parent=self,
+                                title=self.tr('Subtitles License'),
+                                html_filename=licenseFilename)
+        textDialog.exec_()
 
     @staticmethod
     def _readFile(filename):
@@ -153,7 +143,7 @@ class AboutDialog(QDialog):
     def _createVersionLabel(self):
         app = Application.instance()
         version = AboutDialog._readFile('VERSION')
-        versionLabel = QLabel('Version: {}, PyQt5 Version: {}'.format(
-            version, PYQT_VERSION_STR))
+        versionLabel = self._createSelectableLabel(
+            'Version: {}, PyQt5 Version: {}'.format(version, PYQT_VERSION_STR))
         versionLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         return versionLabel

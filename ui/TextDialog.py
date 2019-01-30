@@ -1,42 +1,65 @@
 import sys
-from PyQt5.Qt import Qt, QFontMetrics
+from PyQt5.Qt import (
+    Qt,
+    QFontMetrics,
+    QRect,
+)
 from PyQt5.QtWidgets import (
-    QDialog, QDialogButtonBox, QVBoxLayout, QTextEdit
+    qApp,
+    QDesktopWidget,
+    QDialog,
+    QDialogButtonBox,
+    QTextEdit,
+    QVBoxLayout,
 )
 from log import logger
 
+PHI = 1.61803398875
+
 
 class TextDialog(QDialog):
-    def __init__(self, parent=None, filename=None, text=None):
+    def __init__(self, title, parent=None, html_filename=None, html=None):
         super().__init__(parent)
 
-        self.setWindowTitle(self.tr("Acknowledgements"))
+        self._adjustGeometry()
 
-        self._text = text
-        if not self._text and filename:
-            self._loadTextFromFile(filename)
+        self.setWindowTitle(title)
+
+        if html:
+            self._html = html
+        elif html_filename:
+            self._html = TextDialog._loadFileContents(html_filename)
+        else:
+            raise ValueError('No HTML or HTML file specified')
 
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        textWidget.setHtml(
-            '''
-            <html>
-            <head/>
-            <body>
-            {}
-            </body>
-            </html>
-            '''.format(self._text))
+        textWidget = QTextEdit(self)
+        textWidget.setHtml(self._html)
         layout.addWidget(textWidget)
 
         if sys.platform != 'darwin':
             buttonBox = QDialogButtonBox(QDialogButtonBox.Close)
-            layout.addWidget(button)
+            buttonBox.accepted.connect(self.close)
+            buttonBox.rejected.connect(self.close)
+            layout.addWidget(buttonBox)
 
-    def _loadTextFromFile(self, filename):
+    def _adjustGeometry(self):
+        screenRect: QRect = qApp.desktop().screenGeometry()
+        myGeometry = self.geometry()
+        myGeometry.setHeight(screenRect.height() / PHI)
+        myGeometry.setWidth(screenRect.width() / 2.5)
+        if self.parent():
+            myGeometry.moveCenter(self.parent().geometry().center())
+        else:
+            myGeometry.moveCenter(screenRect.center())
+        self.setGeometry(myGeometry)
+
+    @staticmethod
+    def _loadFileContents(filename):
         try:
             with open(filename, 'rb') as f:
-                self._text = str(f.read(), encoding='utf-8')
-        except e:
+                return str(f.read(), encoding='utf-8')
+        except Exception as e:
             logger.warn("Error reading from file '{}': {}".format(filename, e))
