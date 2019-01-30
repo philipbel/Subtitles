@@ -16,6 +16,12 @@ matrix:
       env:
         - PYTHON=python
           PIP=pip
+      script:
+        - |
+          if [[ "$TRAVIS_OS_NAME" = 'linux' ]]; then
+            sudo $PIP install --upgrade pip$PIP_VERSION_SUFFIX
+            echo $(PIP --version)
+          fi
     - os: osx
       language: generic
       osx_image: xcode10.1
@@ -24,11 +30,9 @@ matrix:
           update: true
           packages:
             - nsis
-      script:
-        - which python
-        - which python3
-        - which pip
-        - which pip3
+      env:
+        - PYTHON=python3
+        - PIP=pip3
     - os: windows
       language: shell
       addons:
@@ -40,10 +44,9 @@ matrix:
         # See https://chocolatey.org/packages/python3
         # and https://docs.python.org/3/using/windows.html
         - choco install python3 --params "/PrependPath=1"
-        - which python
-        - which python3
-        - which pip
-        - which pip3
+      env:
+        - PYTHON=python3
+        - PIP=pip3
 
 env:
   global:
@@ -55,23 +58,23 @@ before_install:
   # PyInstaller cannot be installed using pip 19.1.
   # See https://github.com/pypa/pip/issues/6163
 - |
-  if pip --version | grep -Eq '^pip 19\.1'; then
+  if $PIP --version | grep -Eq '^pip 19\.1'; then
     PIP_VERSION_SUFFIX='=18.1'
   fi
-- |
-  if [[ "$TRAVIS_OS_NAME" = 'linux' ]]; then
-    sudo pip install --upgrade pip$PIP_VERSION_SUFFIX
-    echo $(PIP --version)
-  fi
+# - |
+#   if [[ "$TRAVIS_OS_NAME" = 'linux' ]]; then
+#     sudo $PIP install --upgrade pip$PIP_VERSION_SUFFIX
+#     echo $(PIP --version)
+#   fi
   # See https://github.com/pypa/pip/issues/5236
 - |
   if [[ "$TRAVIS_OS_NAME" = 'osx' ]]; then
     # curl https://bootstrap.pypa.io/get-pip.py | python
-    pip install --upgrade --user pip$PIP_VERSION_SUFFIX
+    $PIP install --upgrade --user pip$PIP_VERSION_SUFFIX
   fi
 - echo $(which $PIP)
 - echo $($PIP --version)
-- pip install --user pipenv
+- $PIP install --user pipenv
 - pipenv install --dev
 
 # script:
