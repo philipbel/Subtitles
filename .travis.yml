@@ -12,37 +12,30 @@ matrix:
       env:
         - PYTHON=python3
           PIP=pip3
+          PIP_INSTALL="sudo $PIP install"
       addons:
         apt:
           update: true
           packages:
             - nsis
-      script:
-        - |
-          echo Installing pip-$PIP_VERSION_SUFFIX
-          sudo $PIP install --upgrade pip$PIP_VERSION_SUFFIX
-          echo $(PIP --version)
-          sudo $PIP install pipenv
     - os: osx
       language: generic
       osx_image: xcode10.1
       env:
         - PYTHON=python3
-        - PIP=pip3
+          PIP=pip3
+          PIP_INSTALL="$PIP install"
       addons:
         homebrew:
           update: true
           packages:
             - nsis
-      script:
-        - |
-          $PIP install --upgrade pip$PIP_VERSION_SUFFIX
-          $PIP install pipenv
     - os: windows
       language: shell
       env:
         - PYTHON=python3
-        - PIP=pip3
+          PIP=pip3
+          PIP_INSTALL="$PIP install"
       addons:
         choco:
           update: true
@@ -53,35 +46,27 @@ matrix:
         # and https://docs.python.org/3/using/windows.html
         - choco install python3 --params "/PrependPath=1"
         - ls $(dirname $(which python))/Scripts
-        - $PIP install pipenv
+        - ls -l /c/ProgramData/chocolatey/bin
 
 env:
   global:
-  - PIPENV_VENV_IN_PROJECT=1
+    - PIPENV_IGNORE_VIRTUALENVS=1
+    - PIPENV_VENV_IN_PROJECT=1
 
 before_install:
-- echo $(which $PYTHON)
-- $PYTHON --version
-  # PyInstaller cannot be installed using pip 19.1.
-  # See https://github.com/pypa/pip/issues/6163
-- |
-  if $PIP --version | grep -Eq '^pip 19'; then
-    PIP_VERSION_SUFFIX='=18.1'
-  fi
-# - |
-#   if [[ "$TRAVIS_OS_NAME" = 'linux' ]]; then
-#     sudo $PIP install --upgrade pip$PIP_VERSION_SUFFIX
-#     echo $(PIP --version)
-#   fi
-  # See https://github.com/pypa/pip/issues/5236
-# - |
-  # if [[ "$TRAVIS_OS_NAME" = 'osx' ]]; then
-    # curl https://bootstrap.pypa.io/get-pip.py | python
-    
-  # fi
-- which $PIP
-- $PIP --version
-- pipenv install --dev
+  - echo $(which $PYTHON)
+  - $PYTHON --version
+    # PyInstaller cannot be installed using pip 19.1.
+    # See https://github.com/pypa/pip/issues/6163
+  - |
+    if $PIP --version | grep -Eq '^pip 19'; then
+      PIP_VERSION_SUFFIX='=18.1'
+      echo Installing pip-$PIP_VERSION_SUFFIX
+      $PIP_INSTALL --upgrade pip$PIP_VERSION_SUFFIX
+    fi
+    which $PIP
+    $PIP --version
+  - pipenv install --dev
 
 # script:
 # - pipenv run pyinstaller -y Subtitles.pyinstaller.spec
