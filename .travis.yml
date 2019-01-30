@@ -14,8 +14,8 @@ matrix:
           packages:
             - nsis
       env:
-        - PYTHON=python
-          PIP=pip
+        - PYTHON=python3
+          PIP=pip3
       script:
         - |
           echo Installing pip-$PIP_VERSION_SUFFIX
@@ -56,12 +56,12 @@ env:
   - PIPENV_VENV_IN_PROJECT=1
 
 before_install:
-- echo $(which $PYTHON)
-- echo $($PYTHON --version)
+- which $PYTHON
+- $PYTHON --version
   # PyInstaller cannot be installed using pip 19.1.
   # See https://github.com/pypa/pip/issues/6163
 - |
-  if $PIP --version | grep -Eq '^pip 19\.1'; then
+  if $PIP --version | grep -Eq '^pip 19'; then
     PIP_VERSION_SUFFIX='=18.1'
   fi
 # - |
@@ -75,8 +75,8 @@ before_install:
     # curl https://bootstrap.pypa.io/get-pip.py | python
     
   # fi
-- echo $(which $PIP)
-- echo $($PIP --version)
+- which $PIP
+- $PIP --version
 - $PIP install --user pipenv
 - pipenv install --dev
 
