@@ -34,12 +34,12 @@ matrix:
             - nsis
       script:
         - |
-          $PIP install --upgrade --user pip$PIP_VERSION_SUFFIX
+          $PIP install --upgrade pip$PIP_VERSION_SUFFIX
     - os: windows
       language: shell
       env:
-        - PYTHON=python
-        - PIP=pip
+        - PYTHON=python3
+        - PIP=pip3
       addons:
         choco:
           update: true
