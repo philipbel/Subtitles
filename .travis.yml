@@ -7,15 +7,15 @@ matrix:
   include:
     - os: linux
       dist: xenial
-      # python: '3.7'
+      python: '3.7'
+      env:
+        - PYTHON=python3
+          PIP=pip3
       addons:
         apt:
           update: true
           packages:
             - nsis
-      env:
-        - PYTHON=python3
-          PIP=pip3
       script:
         - |
           echo Installing pip-$PIP_VERSION_SUFFIX
@@ -24,19 +24,22 @@ matrix:
     - os: osx
       language: generic
       osx_image: xcode10.1
+      env:
+        - PYTHON=python3
+        - PIP=pip3
       addons:
         homebrew:
           update: true
           packages:
             - nsis
-      env:
-        - PYTHON=python3
-        - PIP=pip3
       script:
         - |
           $PIP install --upgrade --user pip$PIP_VERSION_SUFFIX
     - os: windows
       language: shell
+      env:
+        - PYTHON=python
+        - PIP=pip
       addons:
         choco:
           update: true
@@ -47,9 +50,6 @@ matrix:
         # and https://docs.python.org/3/using/windows.html
         - choco install python3 --params "/PrependPath=1"
         - ls $(dirname $(which python))/Scripts
-      env:
-        - PYTHON=python
-        - PIP=pip
 
 env:
   global:
