@@ -22,21 +22,24 @@ matrix:
           packages:
             - nsis
     - os: windows
-      language: generic
+      language: shell
+      addons:
+        choco:
+          update: true
+          packages:
+            - nsis
 
+env:
+  global:
+  - PIPENV_VENV_IN_PROJECT=1
 
-
-# env:
-#   global:
-#   - PIPENV_VENV_IN_PROJECT=1
-
-# before_install:
-# - which pip
-# # PyInstaller cannot be installed using pip 19.1.
-# # See https://github.com/pypa/pip/issues/6163
-# - if pip --version | grep -Eq '^pip 19\.1'; then
-#     PIP_VERSION_SUFFIX='=18.1'
-#   fi
+before_install:
+- which pip
+  # PyInstaller cannot be installed using pip 19.1.
+  # See https://github.com/pypa/pip/issues/6163
+- if pip --version | grep -Eq '^pip 19\.1'; then
+    PIP_VERSION_SUFFIX='=18.1'
+  fi
 # - if [[ "$TRAVIS_OS_NAME" = 'linux' ]]; then
 #     sudo pip install --upgrade pip$PIP_VERSION_SUFFIX
 #   fi
