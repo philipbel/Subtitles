@@ -1,4 +1,4 @@
-language: python
+language: generic
 
 sudo:
   - false
@@ -7,7 +7,7 @@ matrix:
   include:
     - os: linux
       dist: xenial
-      python: '3.7'
+      # python: '3.7'
       addons:
         apt:
           update: true
@@ -24,6 +24,11 @@ matrix:
           update: true
           packages:
             - nsis
+      script:
+        - which python
+        - which python3
+        - which pip
+        - which pip3
     - os: windows
       language: shell
       addons:
@@ -35,6 +40,10 @@ matrix:
         # See https://chocolatey.org/packages/python3
         # and https://docs.python.org/3/using/windows.html
         - choco install python3 --params "/PrependPath=1"
+        - which python
+        - which python3
+        - which pip
+        - which pip3
 
 env:
   global:
