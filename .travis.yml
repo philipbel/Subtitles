@@ -29,12 +29,12 @@ matrix:
             - nsis
       script:
         - |
-          if $PIP --version | grep -Eq '^pip 19'; then
-            PIP_VERSION_SUFFIX='=18.1'
-            echo Installing pip-$PIP_VERSION_SUFFIX
-            $PYTHON -m pip install --upgrade pip-$PIP_VERSION_SUFFIX
-          fi
-          $PIP --version
+          # if $PIP --version | grep -Eq '^pip 19'; then
+          #   PIP_VERSION_SUFFIX='=18.1'
+          #   echo Installing pip-$PIP_VERSION_SUFFIX
+          #   # $PYTHON -m pip install --upgrade pip-$PIP_VERSION_SUFFIX
+          # fi
+          # $PIP --version
     - os: osx
       language: generic
       osx_image: xcode10.1
@@ -69,12 +69,13 @@ before_install:
   - which $PYTHON
   - $PYTHON --version
   - |
-    if $PIP --version | grep -Eq '^pip 19'; then
-      echo Installing pip-$PIP_VERSION_SUFFIX
-      $PIP_INSTALL --upgrade pip$PIP_VERSION_SUFFIX
-    fi
-    which $PIP
-    $PIP --version
+    # if $PIP --version | grep -Eq '^pip 19'; then
+    #   echo Installing pip-$PIP_VERSION_SUFFIX
+    #   $PIP_INSTALL --upgrade pip$PIP_VERSION_SUFFIX
+    # fi
+    pipenv --py
+    pipenv run python -m pip install pip==$PIP_VERSION
+    pipenv run $PIP --version
   - $PIP_INSTALL pipenv
   - pipenv install --dev
 
