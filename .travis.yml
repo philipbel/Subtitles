@@ -74,10 +74,10 @@ matrix:
 before_install:
   - which $PYTHON
   - $PYTHON --version
+  - $PIP_INSTALL pipenv
   - pipenv --py
   - pipenv run python -m pip install pip==$PIP_VERSION
   - pipenv run $PIP --version
-  - $PIP_INSTALL pipenv
 
 install:
   - pipenv install --dev
