@@ -8,6 +8,7 @@ injector = "*"
 "pyqt5" = "*"
 python-opensubtitles = {git = "https://github.com/agonzalezro/python-opensubtitles.git"}
 requests = "*"
+pyinstaller = "*"
 
 [dev-packages]
 "autopep8" = "*"
@@ -15,7 +16,7 @@ nose = "*"
 rope = "*"
 pyinstaller = "*"
 "flake8" = "*"
-"pypiwin32" = { version = "*", sys_platform = "== 'win32'" }
+pypiwin32 = {version = "*",sys_platform = "== 'win32'"}
 
 [requires]
 python_version = "3.7"
