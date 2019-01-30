@@ -3,6 +3,14 @@ language: generic
 sudo:
   - false
 
+env:
+  global:
+    # PyInstaller cannot be installed using pip 19.1.
+    # See https://github.com/pypa/pip/issues/6163
+    - PIP_VERSION='18.1'    - 
+    - PIPENV_IGNORE_VIRTUALENVS=1
+    - PIPENV_VENV_IN_PROJECT=1
+
 matrix:
   include:
     - os: linux
@@ -10,14 +18,23 @@ matrix:
       language: python
       python: '3.7'
       env:
-        - PYTHON=python3
-          PIP=pip3
-          PIP_INSTALL="sudo $PIP install"
+        - PYTHON=python
+          PIP=pip
+          # PIP_INSTALL="sudo $PIP install"
+          PIP_INSTALL="$PIP install"
       addons:
         apt:
           update: true
           packages:
             - nsis
+      script:
+        - |
+          if $PIP --version | grep -Eq '^pip 19'; then
+            PIP_VERSION_SUFFIX='=18.1'
+            echo Installing pip-$PIP_VERSION_SUFFIX
+            $PYTHON -m pip install --upgrade pip-$PIP_VERSION_SUFFIX
+          fi
+          $PIP --version
     - os: osx
       language: generic
       osx_image: xcode10.1
@@ -48,19 +65,11 @@ matrix:
         - ls $(dirname $(which python))/Scripts
         - ls -l /c/ProgramData/chocolatey/bin
 
-env:
-  global:
-    - PIPENV_IGNORE_VIRTUALENVS=1
-    - PIPENV_VENV_IN_PROJECT=1
-
 before_install:
   - which $PYTHON
   - $PYTHON --version
-    # PyInstaller cannot be installed using pip 19.1.
-    # See https://github.com/pypa/pip/issues/6163
   - |
     if $PIP --version | grep -Eq '^pip 19'; then
-      PIP_VERSION_SUFFIX='=18.1'
       echo Installing pip-$PIP_VERSION_SUFFIX
       $PIP_INSTALL --upgrade pip$PIP_VERSION_SUFFIX
     fi
@@ -72,7 +81,6 @@ before_install:
 # script:
 # - pipenv run pyinstaller -y Subtitles.pyinstaller.spec
 # - ls -lR dist
-
 
 # before_deploy:
 #   - export VERSION=$(cat doc/VERSION)
