@@ -9,6 +9,7 @@ injector = "*"
 python-opensubtitles = {git = "https://github.com/agonzalezro/python-opensubtitles.git"}
 requests = "*"
 pyinstaller = "*"
+pywin32-ctypes = {version = "*",sys_platform = "== 'win32'"}
 
 [dev-packages]
 "autopep8" = "*"
@@ -17,6 +18,7 @@ rope = "*"
 pyinstaller = "*"
 "flake8" = "*"
 pypiwin32 = {version = "*",sys_platform = "== 'win32'"}
+pywin32 = {version = "*",sys_platform = "== 'win32'"}
 
 [requires]
 python_version = "3.7"
