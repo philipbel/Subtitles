@@ -43,24 +43,27 @@ env:
 before_install:
 - echo $(which $PYTHON)
 - echo $($PYTHON --version)
-- echo $(which $PIP)
-- echo $($PIP --version)
   # PyInstaller cannot be installed using pip 19.1.
   # See https://github.com/pypa/pip/issues/6163
 - |
   if pip --version | grep -Eq '^pip 19\.1'; then
     PIP_VERSION_SUFFIX='=18.1'
   fi
-# - if [[ "$TRAVIS_OS_NAME" = 'linux' ]]; then
-#     sudo pip install --upgrade pip$PIP_VERSION_SUFFIX
-#   fi
-# # See https://github.com/pypa/pip/issues/5236
-# - if [[ "$TRAVIS_OS_NAME" = 'osx' ]]; then
-#     # curl https://bootstrap.pypa.io/get-pip.py | python
-#     pip install --upgrade --user pip$PIP_VERSION_SUFFIX
-#   fi
-# - pip install --user pipenv
-# - pipenv install --dev
+- |
+  if [[ "$TRAVIS_OS_NAME" = 'linux' ]]; then
+    sudo pip install --upgrade pip$PIP_VERSION_SUFFIX
+    echo $(PIP --version)
+  fi
+  # See https://github.com/pypa/pip/issues/5236
+- |
+  if [[ "$TRAVIS_OS_NAME" = 'osx' ]]; then
+    # curl https://bootstrap.pypa.io/get-pip.py | python
+    pip install --upgrade --user pip$PIP_VERSION_SUFFIX
+  fi
+- echo $(which $PIP)
+- echo $($PIP --version)
+- pip install --user pipenv
+- pipenv install --dev
 
 # script:
 # - pipenv run pyinstaller -y Subtitles.pyinstaller.spec
