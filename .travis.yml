@@ -54,7 +54,7 @@ env:
     - PIPENV_VENV_IN_PROJECT=1
 
 before_install:
-  - echo $(which $PYTHON)
+  - which $PYTHON
   - $PYTHON --version
     # PyInstaller cannot be installed using pip 19.1.
     # See https://github.com/pypa/pip/issues/6163
@@ -66,6 +66,7 @@ before_install:
     fi
     which $PIP
     $PIP --version
+  - $PIP_INSTALL pipenv
   - pipenv install --dev
 
 # script:
