@@ -5,9 +5,6 @@ sudo:
 
 env:
   global:
-    # PyInstaller cannot be installed using pip 19.1.
-    # See https://github.com/pypa/pip/issues/6163
-    - PIP_VERSION='18.1'    - 
     - PIPENV_IGNORE_VIRTUALENVS=1
     - PIPENV_VENV_IN_PROJECT=1
 
@@ -49,10 +46,10 @@ matrix:
             - nsis
     - os: windows
       language: shell
-      env:
-        - PYTHON=python3
-          PIP=pip3
-          PIP_INSTALL="$PIP install"
+      # env:
+      #   - PYTHON=python3
+      #     PIP=pip3
+      #     PIP_INSTALL="$PIP install"
       addons:
         choco:
           update: true
@@ -61,7 +58,7 @@ matrix:
       script:
         # See https://chocolatey.org/packages/python3
         # and https://docs.python.org/3/using/windows.html
-        - choco install python3 --params "/PrependPath=1"
+        # - choco install python3 --params "/PrependPath=1"
         - ls $(dirname $(which python))/Scripts
         - ls -l /c/ProgramData/chocolatey/bin
 
