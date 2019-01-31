@@ -51,12 +51,12 @@ matrix:
         - choco install nsis
         - choco install make
         # XXX: This is ugly.  Is there a better way?
+        - which python
         - python --version
         - python --version | cut -d' ' -f2
         - python --version | cut -d' ' -f2 | tr -d '.' |
         - python --version | cut -d' ' -f2 | tr -d '.' | head -c2
         - export PATH=/c/Python$(python --version | cut -d' ' -f2 | tr -d '.' | head -c2)/Scripts:$PATH
-        - which python
         - which pip
 
 
