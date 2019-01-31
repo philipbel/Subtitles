@@ -43,6 +43,8 @@ matrix:
         # and https://docs.python.org/3/using/windows.html
         - choco install python3 --params "/PrependPath=1"
         - ls -la /c/Python37
+        - ls -la /c/Python37/Scripts
+        - ls -la /c/Python37/Tools
         - cmd.exe /c "call RefreshEnv.cmd"
         - choco install nsis
         - choco install make
