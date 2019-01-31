@@ -42,21 +42,12 @@ matrix:
         # See https://chocolatey.org/packages/python3
         # and https://docs.python.org/3/using/windows.html
         - choco install python3 --params "/PrependPath=1"
-        - ls -la /c/Python37
-        - ls -la /c/Python37/Scripts
-        - ls -la /c/Python37/Tools
-        - echo $PATH
-        - cmd.exe /c "call RefreshEnv.cmd"
-        - echo $PATH
         - choco install nsis
         - choco install make
         # XXX: This is ugly.  Is there a better way?
+        - export PATH=/c/Python37:/c/Python37/Scripts:$PATH
         - which python
         - python --version
-        - python --version | cut -d' ' -f2
-        - python --version | cut -d' ' -f2 | tr -d '.' |
-        - python --version | cut -d' ' -f2 | tr -d '.' | head -c2
-        - export PATH=/c/Python$(python --version | cut -d' ' -f2 | tr -d '.' | head -c2)/Scripts:$PATH
         - which pip
 
 
