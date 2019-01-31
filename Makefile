@@ -69,7 +69,6 @@ release: Subtitles.pyinstaller.spec
 	
 
 depends-Windows:
-	choco install python3 --params "/PrependPath=1"
 
 depends-Linux:
 

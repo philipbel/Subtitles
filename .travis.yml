@@ -49,6 +49,8 @@ matrix:
         - which python
         - python --version
         - which pip
+        - pip install pipenv
+        - which pipenv
 
 
 # if $PIP --version | grep -Eq '^pip 19'; then
