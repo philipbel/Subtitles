@@ -55,6 +55,7 @@ matrix:
           update: true
           packages:
             - nsis
+            - make
       script:
         # See https://chocolatey.org/packages/python3
         # and https://docs.python.org/3/using/windows.html
