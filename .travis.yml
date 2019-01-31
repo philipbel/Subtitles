@@ -52,7 +52,7 @@ matrix:
         - choco install make
         # Is there a better way?
         - PYTHON_VERSION=$(python --version | cut -d' ' -f2 | tr -d '.' | head -c2)
-        - export PATH=/c/Python${PYTHON_VERSION}/Scripts
+        - export PATH=/c/Python${PYTHON_VERSION}/Scripts:$PATH
         - which python
         - which pip
 
