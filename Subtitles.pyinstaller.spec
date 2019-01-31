@@ -7,6 +7,8 @@ import re
 from string import Template
 from os import path
 
+USE_UPX = False
+
 block_cipher = None
 
 # Defaults to .app/Contents/Resources on macOS
@@ -62,7 +64,7 @@ exe = EXE(pyz,
           name='Subtitles',
           debug=False,
           strip=True,
-          upx=True,
+          upx=USE_UPX,
           console=False)
 
 if sys.platform == 'win32':
@@ -77,7 +79,7 @@ coll = COLLECT(exe,
                a.zipfiles,
                a.datas,
                strip=False,
-               upx=True,
+               upx=USE_UPX,
                name='Subtitles',
                icon=icon)
 
