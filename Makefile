@@ -48,13 +48,14 @@ package:
 	@echo "PATH: $(shell echo $$PATH)"
 	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
 
+
 depends: depends-$(PLATFORM) Pipfile.lock
 	$(PIPENV) run python -m pip install pip==$(PIP_VERSION)
 	$(PIPENV) run $(PIP) --version
+	$(PIPENV) update
 
 
 Pipfile.lock: Pipfile
-	$(PIPENV) update
 
 
 release: Subtitles.pyinstaller.spec
