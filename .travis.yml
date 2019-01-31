@@ -50,7 +50,6 @@ matrix:
       before_install:
         # See https://chocolatey.org/packages/python3
         # and https://docs.python.org/3/using/windows.html
-        - choco update
         - choco install python3 --params "/PrependPath=1"
         - choco install nsis
         - choco install make
