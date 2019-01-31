@@ -53,7 +53,7 @@ matrix:
         - choco install python3 --params "/PrependPath=1"
         - choco install nsis
         - choco install make
-        - ls $(dirname $(which python))/Scripts
+        - which python
         - ls -l /c/ProgramData/chocolatey/bin
 
 
