@@ -40,7 +40,7 @@ diag:
 
 
 build: depends
-
+	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
 
 depends: depends-$(PLATFORM) Pipfile.lock
 	$(PIPENV) run python -m pip install pip==$(PIP_VERSION)
@@ -52,7 +52,7 @@ Pipfile.lock: Pipfile
 
 
 release: Subtitles.pyinstaller.spec
-	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
+	
 
 depends-Windows:
 	choco install python3 --params "/PrependPath=1"

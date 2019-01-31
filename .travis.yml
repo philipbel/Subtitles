@@ -69,14 +69,15 @@ matrix:
 # fi
 
 before_install:
-  - which $PYTHON
-  - $PYTHON --version
-  - $PIP_INSTALL pipenv
-  - pipenv run python -m pip install pip==$PIP_VERSION
-  - pipenv run $PIP --version
+  # - which $PYTHON
+  # - $PYTHON --version
+  # - $PIP_INSTALL pipenv
+  # - pipenv run python -m pip install pip==$PIP_VERSION
+  # - pipenv run $PIP --version
+  - make build
 
 install:
-  - pipenv install --dev
+  - make release
 
 # script:
 # - pipenv run pyinstaller -y Subtitles.pyinstaller.spec
