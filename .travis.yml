@@ -42,7 +42,7 @@ matrix:
         # See https://chocolatey.org/packages/python3
         # and https://docs.python.org/3/using/windows.html
         - choco install python3 --params "/PrependPath=1"
-        - refreshenv
+        - cmd.exe /c "call RefreshEnv.cmd"
         - choco install nsis
         - choco install make
         - which python
