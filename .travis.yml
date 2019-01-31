@@ -14,11 +14,6 @@ matrix:
       dist: xenial
       language: python
       python: '3.7'
-      env:
-        - PYTHON=python
-        - PIP=pip
-          # PIP_INSTALL="sudo $PIP install"
-        - PIP_INSTALL="$PIP install"
       addons:
         apt:
           update: true
@@ -35,10 +30,6 @@ matrix:
     - os: osx
       language: generic
       osx_image: xcode10.1
-      env:
-        - PYTHON=python3
-          PIP=pip3
-          PIP_INSTALL="$PIP install"
       addons:
         homebrew:
           update: true
@@ -54,6 +45,7 @@ matrix:
         - choco install nsis
         - choco install make
         - which python
+        - which pip
         - ls -l /c/ProgramData/chocolatey/bin
 
 

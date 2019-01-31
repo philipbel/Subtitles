@@ -9,6 +9,13 @@ PIP_VERSION := '18.1'
 PLATFORM := $(shell uname -s)
 ifneq (,$(findstring MINGW, $(PLATFORM)))
 	PLATFORM := Windows
+else
+	ifneq (,$(findstring MSYS_NT, $(PLATFORM)))
+		PLATFORM := Windows
+	endif
+endif
+
+ifeq ($(PLATFORM),Windows)
 	PYTHON := python3
 	PIP := pip3
 	PIP_INSTALL := "$(PIP) install"
