@@ -39,7 +39,13 @@ diag:
 	@echo "PIP_INSTALL=$(PIP_INSTALL)"
 
 
-build: depends
+build: depends package
+
+
+package:
+	@echo "PWD: $(shell pwd)"
+	ls -la
+	@echo "PATH: $(shell echo $$PATH)"
 	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
 
 depends: depends-$(PLATFORM) Pipfile.lock
