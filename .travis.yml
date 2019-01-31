@@ -50,10 +50,8 @@ matrix:
         - echo $PATH
         - choco install nsis
         - choco install make
-      install:
-        # Is there a better way?
-        - export PYTHON_VERSION=$(python --version | cut -d' ' -f2 | tr -d '.' | head -c2)
-        - export PATH=/c/Python${PYTHON_VERSION}/Scripts:$PATH
+        # XXX: This is ugly.  Is there a better way?
+        - export PATH=/c/Python$(python --version | cut -d' ' -f2 | tr -d '.' | head -c2)/Scripts:$PATH
         - which python
         - which pip
 
