@@ -45,12 +45,14 @@ matrix:
         - ls -la /c/Python37
         - ls -la /c/Python37/Scripts
         - ls -la /c/Python37/Tools
+        - echo $PATH
         - cmd.exe /c "call RefreshEnv.cmd"
+        - echo $PATH
         - choco install nsis
         - choco install make
-        - which python
-        - which pip
-        - ls -l /c/ProgramData/chocolatey/bin
+        # - which python
+        # - which pip
+        # - ls -l /c/ProgramData/chocolatey/bin
 
 
 # if $PIP --version | grep -Eq '^pip 19'; then
@@ -66,6 +68,7 @@ matrix:
   # - pipenv run $PIP --version
 
 install:
+  - which pip
   - make build
   - make release
 
