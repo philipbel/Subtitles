@@ -44,22 +44,16 @@ matrix:
           update: true
           packages:
             - nsis
+            - pipenv
     - os: windows
       language: shell
-      # env:
-      #   - PYTHON=python3
-      #     PIP=pip3
-      #     PIP_INSTALL="$PIP install"
-      addons:
-        choco:
-          update: true
-          packages:
-            - nsis
-            - make
       script:
         # See https://chocolatey.org/packages/python3
         # and https://docs.python.org/3/using/windows.html
-        # - choco install python3 --params "/PrependPath=1"
+        - choco update
+        - choco install python3 --params "/PrependPath=1"
+        - choco install nsis
+        - choco install make
         - ls $(dirname $(which python))/Scripts
         - ls -l /c/ProgramData/chocolatey/bin
 
