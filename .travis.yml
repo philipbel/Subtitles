@@ -47,7 +47,7 @@ matrix:
             - pipenv
     - os: windows
       language: shell
-      script:
+      before_install:
         # See https://chocolatey.org/packages/python3
         # and https://docs.python.org/3/using/windows.html
         - choco update
