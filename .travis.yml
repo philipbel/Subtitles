@@ -50,9 +50,11 @@ matrix:
         - echo $PATH
         - choco install nsis
         - choco install make
-        # - which python
-        # - which pip
-        # - ls -l /c/ProgramData/chocolatey/bin
+        # Is there a better way?
+        - PYTHON_VERSION=$(python --version | cut -d' ' -f2 | tr -d '.' | head -c2)
+        - export PATH=/c/Python${PYTHON_VERSION}/Scripts
+        - which python
+        - which pip
 
 
 # if $PIP --version | grep -Eq '^pip 19'; then
