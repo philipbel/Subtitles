@@ -36,9 +36,8 @@ for b in collect_dynamic_libs('PyQt5'):
         print('*** Adding Qt5 Style {}'.format(b[0]))
         binaries.append(b)
 
-a = Analysis([
-    path.join(path.abspath('.'), 'main.py')
-],
+a = Analysis(
+    [ path.join(path.abspath('.'), 'main.py') ],
     binaries=binaries,
     datas=[
         ('doc/VERSION', RESOURCES_DIR),
@@ -48,13 +47,14 @@ a = Analysis([
         ('resources/Subtitles.png', RESOURCES_DIR), ],
     hiddenimports=[
         'pythonopensubtitles'
-],
+    ],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher)
+
 pyz = PYZ(a.pure,
           a.zipped_data,
           cipher=block_cipher)
@@ -73,6 +73,7 @@ elif sys.platform == 'darwin':
     icon = 'resources/Subtitles.icns'
 else:
     icon = 'resources/Subtitles.png'
+
 
 coll = COLLECT(exe,
                a.binaries,
