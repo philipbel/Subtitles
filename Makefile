@@ -91,8 +91,6 @@ $(ZIP_FILE): $(DISTDIR)
 
 
 package-Linux: $(ZIP_FILE)
-	ls -la $(DISTDIR)
-	ls -la $(DISTDIR)/Subtitles
 
 
 depends: depends-$(PLATFORM) pip-version Pipfile.lock
