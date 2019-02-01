@@ -67,12 +67,6 @@ before_deploy:
   # - git tag release-$TRAVIS_TAG
   - pwd
   - ls dist/
-  - ls dist/Subtitles-*.dmg
-  - ls dist/Subtitles-*.zip
-  - ls dist/Subtitles-*-Setup.exe
-  - ls dist/Subtitles-*.deb
-  - ls dist/Subtitles-*.rpm
-  - exit 1
 #   - case "$TRAVIS_OS_NAME" in
 #     'linux')
 #       export RELEASE_FILE="dist/Subtitles-$VERSION.zip";;
@@ -90,11 +84,11 @@ deploy:
     secure: Yh1aLpZGOxxMDcyd79cee5c5nhKLyaU2FCF6x+kZyOf5H/tc9Njhy1vi9QZ7oF//q3tkJz699AnUl8mpa6jY2xSW4DMnDEP6y0ZnzBtrQNOoK2V5q0zC+uibBRBm/AeSRz54rPFIZWwpFwKuG9MGV5FxJQYfyht/0Axb228/tXgCDBwaC/AUVuVSeww3AK3jyH2tF1q+TxtIavkpK+a2CS6/hRYzQw4lqSRpSat0HTbv1YBKp0zlTVkoVxYzdK49tFRhrO+/6emaeUWv1LTeN4S3hQ3LQgn/T2h3fCbg58x1mJcFD2AALmx1kCOzNq6m8IuDiLDQHkPSKUZDvW9tY95gOK4eOUYoRfzocUrGj18mA3l2qiZXEKQc8C1FfSTRaKWkbzj6ZHZjtI89pNCxam2DB6sQM6Po0aplQgz/pI6kU4mVluo0ouwiI+yRTddExhp+B3cOp852CX4xAvr3UoP2uHuZIjFA4X9GCQWQaTpyrOSRpHXllcR3g3gaDVjFTubHALHRvK7ah9BlyNrrt1wPRp4t2bgbpRKL+7S9VyiVpybvNi4aEk02bDUpRVaXay+DX1W9ERT5QG4UPJLA44ffVHe6DctWe4q//9lvOrG7jjdxCtL8cA0zn6pLpUBRQ+EeHgHMwLHISLm0H7LL2Qbp3qX56hRD1+AJApym3SQ=
   file_glob: true
   file:
-    - "dist/Subtitles-*.dmg"
-    - "dist/Subtitles-*.zip"
-    - "dist/Subtitles-*-Setup.exe"
-    - "dist/Subtitles-*.deb"
-    - "dist/Subtitles-*.rpm"
+    - dist/Subtitles-*.dmg
+    - dist/Subtitles-*.zip
+    - dist/Subtitles-*-Setup.exe
+    - dist/Subtitles-*.deb
+    - dist/Subtitles-*.rpm
   on:
     repo: philipbel/Subtitles
     # branch: release
