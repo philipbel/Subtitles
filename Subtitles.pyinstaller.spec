@@ -36,15 +36,20 @@ for b in collect_dynamic_libs('PyQt5'):
         print('*** Adding Qt5 Style {}'.format(b[0]))
         binaries.append(b)
 
+data_files = [
+    ('doc/VERSION', RESOURCES_DIR),
+    ('doc/ACKNOWLEDGEMENTS.html', RESOURCES_DIR),
+    # ('doc/LICENSE.PyQt5', RESOURCES_DIR),
+    ('doc/LICENSE.html',  RESOURCES_DIR),
+    ('resources/Subtitles.png', RESOURCES_DIR),
+]
+if path.exists('doc/VERSION.commit'):
+    data_files.append(('doc/VERSION.commit', RESOURCES_DIR))
+
 a = Analysis(
     [ path.join(path.abspath('.'), 'main.py') ],
     binaries=binaries,
-    datas=[
-        ('doc/VERSION', RESOURCES_DIR),
-        ('doc/ACKNOWLEDGEMENTS.html', RESOURCES_DIR),
-        # ('doc/LICENSE.PyQt5', RESOURCES_DIR),
-        ('doc/LICENSE.html',  RESOURCES_DIR),
-        ('resources/Subtitles.png', RESOURCES_DIR), ],
+    datas=data_files,
     hiddenimports=[
         'pythonopensubtitles'
     ],

@@ -9,6 +9,8 @@ PIPENV := pipenv
 # See https://github.com/pypa/pip/issues/6163
 PIP_REQUIRED_VERSION := '18.1'
 VERSION := $(shell cat doc/VERSION)
+GIT_COMMIT := $(shell git log --pretty=format:'%h' -n 1)
+
 
 NAME_VERSION := Subtitles-$(VERSION)
 DMG_FILE := $(DISTDIR)/$(NAME_VERSION).dmg
@@ -61,6 +63,9 @@ diag:
 
 
 build:
+	@if [ -n "$(GIT_COMMIT)" ]; then \
+		echo "$(GIT_COMMIT)" > doc/VERSION.commit; \
+	fi
 	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
 
 

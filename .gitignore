@@ -95,3 +95,4 @@ ENV/
 .mypy_cache/
 
 *.code-workspace
+doc/VERSION.commit

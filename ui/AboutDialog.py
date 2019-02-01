@@ -144,6 +144,11 @@ class AboutDialog(QDialog):
         app = Application.instance()
         version = AboutDialog._readFile('VERSION')
         versionLabel = self._createSelectableLabel(
-            'Version: {}, PyQt5 Version: {}'.format(version, PYQT_VERSION_STR))
+            self.tr(f'Version: {version}' + '\n'
+                + f'PyQt5 Version: {PYQT_VERSION_STR}'))
+        commit = AboutDialog._readFile('VERSION.commit')
+        if commit:
+            versionLabel.setText(
+                versionLabel.text() + '\n' + self.tr(f'Git Commit: {commit}'))
         versionLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         return versionLabel
