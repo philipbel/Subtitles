@@ -51,9 +51,10 @@ build: depends package
 
 package: package-$(PLATFORM)
 
+
 DISTDIR := dist
-DMG_NAME := Subtitles-$(VERSION)
-DMG_FILE := $(DISTDIR)/$(DMG_NAME).dmg
+NAME_VERSION := Subtitles-$(VERSION)
+DMG_FILE := $(DISTDIR)/$(NAME_VERSION).dmg
 DMG_SRCDIR := $(DISTDIR)/dmg_dir
 # DMG_TEMP := $(shell mktemp)
 APP_BUNDLE := $(DISTDIR)/Subtitles.app
@@ -67,12 +68,23 @@ $(DMG_FILE): $(APP_BUNDLE)
 	hdiutil create "$(DMG_FILE)" \
 		-srcfolder "$(DMG_SRCDIR)" \
 		-format UDBZ \
-		-volname "$(DMG_NAME)"
+		-volname "$(NAME_VERSION)"
 	$(RM) -r "$(DMG_SRCDIR)"
-
 
 $(APP_BUNDLE): Subtitles.pyinstaller.spec
 	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
+
+
+EXE := $(DISTDIR)/Subtitles/Subtitles.exe
+ZIP_FILE := $(DISTDIR)/$(NAME_VERSION).zip
+
+package-Windows: $(ZIP_FILE)
+
+$(ZIP_FILE): $(DISTDIR)
+	$(RM) $(ZIP_FILE)
+	@cd $(DISTDIR) && zip -dd -9 -o -r $(NAME_VERSION).zip Subtitles >/dev/null
+
+
 
 
 depends: depends-$(PLATFORM)
