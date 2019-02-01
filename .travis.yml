@@ -20,7 +20,7 @@ matrix:
           packages:
             - nsis
       before_install:
-        - sudo pip3 install pipenv
+        - sudo pip install --upgrade pipenv
       # script:
     - os: osx
       language: generic
@@ -42,13 +42,13 @@ matrix:
         - choco install zip
         # XXX: This is ugly.  Is there a better way?
         - export PATH=/c/Python37:/c/Python37/Scripts:$PATH
-        - pip install pipenv
+        - pip install --upgrade pipenv
 
-before_install:
-  - touch Pipfile
-  - make depends
+# before_install:
 
 install:
+  - touch Pipfile
+  - make depends
   - make build
   - make package
 
