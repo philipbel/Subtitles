@@ -42,11 +42,12 @@ matrix:
         - export PATH=/c/Python37:/c/Python37/Scripts:$PATH
         - pip install pipenv
 
-# before_install:
+before_install:
+  - make depends
 
 install:
   - make build
-  - make release
+  - make package
 
 # script:
 
