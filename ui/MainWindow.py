@@ -12,7 +12,7 @@ from PyQt5.Qt import (
 from PyQt5.QtWidgets import (
     QLabel, QWidget, QVBoxLayout, QFileDialog
 )
-from PyQt5.QtSvg import QSvgWidget
+# from PyQt5.QtSvg import QSvgWidget
 from .worker import Worker
 from .PreferencesDialog import PreferencesDialog
 from .AboutDialog import AboutDialog
@@ -130,11 +130,11 @@ class MainWindow(QMainWindow):
 
     def _createSpinnerWidget(self):
         widget = QWidget(self)
-        layout = QVBoxLayout()
-        spinner = QSvgWidget(widget)
-        spinner.load('./ui/circles.svg')
-        spinner.setFixedSize(64, 64)
-        layout.addWidget(spinner)
+        # layout = QVBoxLayout()
+        # spinner = QSvgWidget(widget)
+        # spinner.load('./ui/circles.svg')
+        # spinner.setFixedSize(64, 64)
+        # layout.addWidget(spinner)
         return widget
 
     def _createInstructionWidget(self):
