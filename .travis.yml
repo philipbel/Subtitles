@@ -19,14 +19,7 @@ matrix:
           update: true
           packages:
             - nsis
-      script:
-        - |
-          # if $PIP --version | grep -Eq '^pip 19'; then
-          #   PIP_VERSION_SUFFIX='=18.1'
-          #   echo Installing pip-$PIP_VERSION_SUFFIX
-          #   # $PYTHON -m pip install --upgrade pip-$PIP_VERSION_SUFFIX
-          # fi
-          # $PIP --version
+      # script:
     - os: osx
       language: generic
       osx_image: xcode10.1
@@ -44,35 +37,19 @@ matrix:
         - choco install python3 --params "/PrependPath=1"
         - choco install nsis
         - choco install make
+        - choch install zip
         # XXX: This is ugly.  Is there a better way?
         - export PATH=/c/Python37:/c/Python37/Scripts:$PATH
-        - which python
-        - python --version
-        - which pip
         - pip install pipenv
-        - which pipenv
-
-
-# if $PIP --version | grep -Eq '^pip 19'; then
-#   echo Installing pip-$PIP_VERSION_SUFFIX
-#   $PIP_INSTALL --upgrade pip$PIP_VERSION_SUFFIX
-# fi
 
 # before_install:
-  # - which $PYTHON
-  # - $PYTHON --version
-  # - $PIP_INSTALL pipenv
-  # - pipenv run python -m pip install pip==$PIP_VERSION
-  # - pipenv run $PIP --version
 
 install:
-  - which pip
   - make build
   - make release
 
 # script:
-# - pipenv run pyinstaller -y Subtitles.pyinstaller.spec
-# - ls -lR dist
+
 
 # before_deploy:
 #   - export VERSION=$(cat doc/VERSION)
