@@ -19,6 +19,7 @@ matrix:
           update: true
           packages:
             - nsis
+            - pipenv
       # script:
     - os: osx
       language: generic
@@ -43,6 +44,7 @@ matrix:
         - pip install pipenv
 
 before_install:
+  - touch Pipfile
   - make depends
 
 install:
