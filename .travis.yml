@@ -37,7 +37,7 @@ matrix:
         - choco install python3 --params "/PrependPath=1"
         - choco install nsis
         - choco install make
-        - choch install zip
+        - choco install zip
         # XXX: This is ugly.  Is there a better way?
         - export PATH=/c/Python37:/c/Python37/Scripts:$PATH
         - pip install pipenv
