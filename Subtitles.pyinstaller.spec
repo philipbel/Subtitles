@@ -1,6 +1,7 @@
 # -*- mode: python -*-
 
 from PyInstaller.utils.hooks import collect_dynamic_libs
+from PyInstaller.building.datastruct import TOC
 
 import sys
 import re
@@ -47,7 +48,7 @@ if path.exists('doc/VERSION.commit'):
     data_files.append(('doc/VERSION.commit', RESOURCES_DIR))
 
 a = Analysis(
-    [ path.join(path.abspath('.'), 'main.py') ],
+    [path.join(path.abspath('.'), 'main.py')],
     binaries=binaries,
     datas=data_files,
     hiddenimports=[
@@ -55,10 +56,111 @@ a = Analysis(
     ],
     hookspath=[],
     runtime_hooks=[],
-    excludes=[],
+    excludes=[
+        # 'PyQt5.QtBluetooth',
+        # 'PyQt5.QtWebEngineCore',
+        # 'PyQt5.QtWebEngine',
+        # 'PyQt5.QtWebEngineWidgets',
+        # 'PyQt5.QtLocation',
+        # 'PyQt5.QtWebChannel',
+        # 'PyQt5.QtQuick',
+        # 'PyQt5.QtQuickWidgets',
+        # 'PyQt5.QtSql',
+        # 'PyQt5.QtWebSockets',
+        # 'PyQt5.QtMultimedia',
+        # 'PyQt5.QtMultimediaWidgets',
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher)
+
+
+# print(type(a.binaries))
+# print(type(a.binaries[0]))
+# print(type(a.binaries[0][0]))
+print(a.binaries[0])
+print(a.binaries[1])
+print(a.binaries[2])
+
+
+QT_MODULE_EXCLUDES = [
+    'QtBluetooth',
+    # 'QtDBus',  # Needed by libqcocoa.dylib
+    'QtDesigner',
+    'QtLocation',
+    'QtMultimedia',
+    'QtMultimediaWidgets',
+    'QtNetwork',
+    'QtNetworkAuth',
+    'QtNfc',
+    'QtPositioning',
+    'QtPositioningQuick',
+    # 'QtPrintSupport',  # Needed  by libqcocoa.dylib
+    'QtQml',
+    'QtQuick',
+    'QtQuickControls2',
+    'QtQuickParticles',
+    'QtQuickTemplates2',
+    'QtSensors',
+    'QtSerialPort',
+    'QtSql',
+    'QtSvg',
+    'QtWebChannel',
+    'QtWebEngine',
+    'QtWebEngineCore',
+    'QtWebEngineWidgets',
+    'QtWebSockets',
+    'QtXmlPatterns'
+]
+
+MODULE_EXCLUDES = []
+for x in QT_MODULE_EXCLUDES:
+    MODULE_EXCLUDES.append(x)
+    MODULE_EXCLUDES.append('PyQt5.' + x)
+
+new_binaries = []
+
+for module, file, typ in a.binaries:
+    should_exclude = False
+    for qt_mod in MODULE_EXCLUDES:
+        print(f"qt_mod={qt_mod}, module={module}")
+        if qt_mod in module:
+            should_exclude = True
+    if 'PyQt5/Qt/qml/' in file \
+            or 'libqwebgl.dylib' in module \
+            or 'libqwebp.dylib' in module \
+            or 'libqtiff.dylib' in module \
+            or module.startswith('PyQt5/Qt/plugins/sqldrivers/') \
+            or module.startswith('PyQt5/Qt/plugins/mediaservice/') \
+            or module.startswith('PyQt5/Qt/plugins/position') \
+            or 'QtWebEngineCore.framework' in file:
+        should_exclude = True
+    if should_exclude:
+        print("*** Excluding: {}".format(module))
+        continue
+    new_binaries.append((module, file, typ))
+
+
+new_datas = []
+for module, file, typ in a.datas:
+    if module.startswith('PyQt5/Qt/qml/') or \
+            module.startswith('PyQt5/Qt/lib/QtWebEngineCore.framework'):
+        print("*** Excluding {}".format(module))
+        continue
+    new_datas.append((module, file, type))
+
+
+a.binaries = TOC(initlist=new_binaries)
+a.datas = TOC(initlist=new_datas)
+
+
+for attrib in ['scripts', 'pure', 'binaries', 'datas', 'zipfiles']:
+    fn = attrib + '.txt'
+    with open(fn, 'wb+') as fp:
+        for m, f, t in getattr(a, attrib):
+            fp.write("({}, {}, {})\n".format(m, f, t).encode('utf-8'))
+    print('*** {} written to {}'.format(attrib, fn))
+
 
 pyz = PYZ(a.pure,
           a.zipped_data,
