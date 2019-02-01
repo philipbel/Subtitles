@@ -58,11 +58,11 @@ script:
 before_deploy:
   - git config --local user.name "Philip Belemezov"
   - git config --local user.email "philip@belemezov.net"
-  - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-  - echo "TRAVIS_TAG=${TRAVIS_TAGS}"
+  # - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+  - export TRAVIS_TAG=$VERSION
+  - echo "TRAVIS_TAG=${TRAVIS_TAG}"
   - echo "TRAVIS_OS_NAME=$TRAVIS_OS_NAME"
-
-  # - git tag $TRAVIS_TAG
+  - git tag release-$TRAVIS_TAG
 #   - export VERSION=$(cat doc/VERSION)
 #   - case "$TRAVIS_OS_NAME" in
 #     'linux')
