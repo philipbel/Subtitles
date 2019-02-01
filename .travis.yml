@@ -60,7 +60,7 @@ before_deploy:
   - git config --local user.email "philip@belemezov.net"
   - export VERSION=$(cat doc/VERSION)
   # - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-  - export TRAVIS_TAG=$VERSION
+  - export TRAVIS_TAG=v${VERSION}
   - echo "TRAVIS_TAG=${TRAVIS_TAG}"
   - echo "TRAVIS_OS_NAME=$TRAVIS_OS_NAME"
   # TODO: Run tests and only then tag?
