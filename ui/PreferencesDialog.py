@@ -1,11 +1,28 @@
 import sys
 from os import path
 from PyQt5.Qt import (
-    Qt, QApplication, QIcon, QLocale, QTextCodec, QMimeData
+    QApplication,
+    QIcon,
+    QLocale,
+    QMimeData,
+    Qt,
+    QTextCodec,
 )
 from PyQt5.QtWidgets import (
-    QDialog, QFormLayout, QListWidget, QListWidgetItem, QComboBox,
-    QDialogButtonBox, QVBoxLayout
+    QAbstractItemView,
+    QComboBox,
+    QCheckBox,
+    QDialog,
+    QDialogButtonBox,
+    QLineEdit,
+    QHBoxLayout,
+    QFormLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QSizePolicy,
+    QPushButton,
+    QVBoxLayout
 )
 from .Settings import Settings
 from Application import Application
@@ -45,14 +62,32 @@ class PreferencesDialog(QDialog):
         formLayout = QFormLayout()
 
         self._langList = self._initLanguageList()
-        formLayout.addRow(self.tr("Subtitle Languages:"), self._langList)
+        formLayout.addRow(self.tr("Subtitle languages:"), self._langList)
 
         self._encodingList = self._initEncodingList()
-        formLayout.addRow(self.tr("Encoding:"), self._encodingList)
+        formLayout.addRow(self.tr("Save subtitles with encoding:"),
+                          self._encodingList)
 
         # TODO: Make async
         languages = self._subService.get_languages()
         self._onLanguagesReceived(languages)
+
+        browseAppLayout = QHBoxLayout()
+        appEdit = QLineEdit(self.tr(""))
+        appEdit.setPlaceholderText(self.tr("Default"))
+        appEdit.sizePolicy().setHorizontalPolicy(QSizePolicy.Minimum)
+        appEdit.sizePolicy().setHorizontalStretch(3)
+        browseButton = QPushButton(self.tr("Browse..."))
+        browseButton.sizePolicy().setHorizontalStretch(1)
+        browseButton.sizePolicy().setHorizontalPolicy(QSizePolicy.Minimum)
+        browseAppLayout.addWidget(appEdit)  # TODO:
+        browseAppLayout.addWidget(browseButton)
+        formLayout.addRow(
+            QLabel(self.tr("Use video player:")), browseAppLayout)
+
+        formLayout.addRow(QLabel(),
+                          QCheckBox(self.tr(
+                              "Automatically play movie after a successful subtitle download.")))
 
         self.setWindowTitle(self.tr("Preferences"))
 
@@ -97,6 +132,7 @@ class PreferencesDialog(QDialog):
         sysLang = QLocale.languageToString(loc.language())
         preferredLanguages = self._getPreferredLanguages()
         self._langList.clear()
+        firstCheckedItem = None
         for lang in sorted(languages, key=lambda x: x['name']):
             langName = lang['name']
             langCode = lang['code']
@@ -108,14 +144,16 @@ class PreferencesDialog(QDialog):
             item = QListWidgetItem(text)
             item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
             item.setData(Qt.UserRole, langCode)
-            if preferredLanguages and langCode in preferredLanguages:
+            if (preferredLanguages and langCode in preferredLanguages) \
+                    or isSystemLang:
                 item.setCheckState(Qt.Checked)
-            elif isSystemLang:
-                item.setCheckState(Qt.Checked)
+                firstCheckedItem = item
             else:
                 item.setCheckState(Qt.Unchecked)
             self._langList.addItem(item)
         self._langList.setMinimumWidth(self._langList.sizeHintForColumn(0))
+        if firstCheckedItem:
+            self._langList.scrollToItem(firstCheckedItem)
 
     def _getPreferredCodec(self):
         settings = Settings()
