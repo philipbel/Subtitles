@@ -49,10 +49,10 @@ matrix:
 install:
   - touch Pipfile
   - make depends
-  - make build
+
+script:
   - make package
 
-# script:
 
 
 # before_deploy:
