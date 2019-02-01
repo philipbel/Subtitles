@@ -87,6 +87,7 @@ QT_MODULE_EXCLUDES = [
     'QtBluetooth',
     # 'QtDBus',  # Needed by libqcocoa.dylib
     'QtDesigner',
+    'QtHelp',
     'QtLocation',
     'QtMultimedia',
     'QtMultimediaWidgets',
@@ -105,6 +106,7 @@ QT_MODULE_EXCLUDES = [
     'QtSerialPort',
     'QtSql',
     'QtSvg',
+    'QtTest',
     'QtWebChannel',
     'QtWebEngine',
     'QtWebEngineCore',
@@ -130,9 +132,13 @@ for module, file, typ in a.binaries:
             or 'libqwebgl.dylib' in module \
             or 'libqwebp.dylib' in module \
             or 'libqtiff.dylib' in module \
-            or module.startswith('PyQt5/Qt/plugins/sqldrivers/') \
-            or module.startswith('PyQt5/Qt/plugins/mediaservice/') \
+            or 'libqsvgicon.dylib' in module \
+            or module.startswith('PyQt5/Qt/plugins/sqldrivers') \
+            or module.startswith('PyQt5/Qt/plugins/mediaservice') \
             or module.startswith('PyQt5/Qt/plugins/position') \
+            or module.startswith('PyQt5/Qt/plugins/sensors') \
+            or module.startswith('PyQt5/Qt/plugins/sensorgestures') \
+            or module.startswith('PyQt5/Qt/plugins/audio') \
             or 'QtWebEngineCore.framework' in file:
         should_exclude = True
     if should_exclude:
@@ -143,8 +149,9 @@ for module, file, typ in a.binaries:
 
 new_datas = []
 for module, file, typ in a.datas:
-    if module.startswith('PyQt5/Qt/qml/') or \
-            module.startswith('PyQt5/Qt/lib/QtWebEngineCore.framework'):
+    if module.startswith('PyQt5/Qt/qml/') \
+            or module.startswith('PyQt5/Qt/lib/QtWebEngineCore.framework') \
+            or module.startswith('PyQt5/Qt/translations'):
         print("*** Excluding {}".format(module))
         continue
     new_datas.append((module, file, type))
