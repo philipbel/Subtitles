@@ -125,5 +125,5 @@ clean:
 	$(RM) -r build dist
 
 
-.PHONY: err diag clean build
+.PHONY: err diag clean build depends depends-$(PLATFORM) pip-version
 err: ; $(ERROR)

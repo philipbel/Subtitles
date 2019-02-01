@@ -19,7 +19,8 @@ matrix:
           update: true
           packages:
             - nsis
-            - pipenv
+      before_install:
+        - sudo pip install pipenv
       # script:
     - os: osx
       language: generic
