@@ -64,7 +64,7 @@ before_deploy:
   - echo "TRAVIS_TAG=${TRAVIS_TAG}"
   - echo "TRAVIS_OS_NAME=$TRAVIS_OS_NAME"
   # TODO: Run tests and only then tag?
-  # - git tag release-$TRAVIS_TAG
+  - git tag $TRAVIS_TAG
   - pwd
   - ls dist/
 #   - case "$TRAVIS_OS_NAME" in
