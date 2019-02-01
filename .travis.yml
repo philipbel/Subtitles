@@ -64,6 +64,11 @@ before_deploy:
   - echo "TRAVIS_TAG=${TRAVIS_TAG}"
   - echo "TRAVIS_OS_NAME=$TRAVIS_OS_NAME"
   - git tag release-$TRAVIS_TAG
+  - ls "dist/Subtitles-*.dmg"
+  - ls "dist/Subtitles-*.zip"
+  - ls "dist/Subtitles-*-Setup.exe"
+  - ls "dist/Subtitles-*.deb"
+  - ls "dist/Subtitles-*.rpm"
 #   - case "$TRAVIS_OS_NAME" in
 #     'linux')
 #       export RELEASE_FILE="dist/Subtitles-$VERSION.zip";;
