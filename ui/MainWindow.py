@@ -6,11 +6,26 @@ import sys
 import requests
 from os import path
 from PyQt5.Qt import (
-    Qt, QThreadPool, QMainWindow, QErrorMessage, pyqtSlot, QAction,
-    QApplication, QMimeType, QMimeDatabase, QKeySequence, QMenu
+    pyqtSlot,
+    QAction,
+    QApplication,
+    QErrorMessage,
+    QKeySequence,
+    QMainWindow,
+    QMenu,
+    QMimeDatabase,
+    QMimeType,
+    Qt,
+    QThreadPool,
 )
 from PyQt5.QtWidgets import (
-    QLabel, QWidget, QVBoxLayout, QFileDialog
+    QFileDialog,
+    QLabel,
+    QMenuBar,
+    QProgressBar,
+    QHBoxLayout,
+    QVBoxLayout,
+    QWidget,
 )
 # from PyQt5.QtSvg import QSvgWidget
 from .worker import Worker
@@ -53,20 +68,27 @@ class MainWindow(QMainWindow):
         self.setAcceptDrops(True)
 
     def _initMenu(self):
-        mb = self.menuBar()
+        # mb = self.menuBar()
+        self.setMenuBar(None)
+        mb = QMenuBar(parent=None)
+        # self.setMenuBar(mb)
+
         fileMenu = mb.addMenu(self.tr("&File"))
         openMovieAction = fileMenu.addAction(self.tr("&Open Movie..."))
         openMovieAction.triggered.connect(self.showOpenFile)
         openMovieAction.setShortcut(QKeySequence.Open)
 
         if sys.platform == 'darwin':
-            quitAction = mb.addAction("quit")
-            aboutAction = mb.addMenu("about")
-            preferencesAction = mb.addMenu("preferences")
+            # XXX: Keep this in the "File" menu.  Qt on macOS will automatically
+            # move them to the correct location.
+            # Adding them to the QMenuBar directly does not work.
+            quitAction = fileMenu.addAction("Quit")
+            aboutAction = fileMenu.addAction("About")
+            preferencesAction = fileMenu.addAction("preferences")
         else:
             ABOUT_ACTION = "&About"
             if sys.platform == 'win32':
-                PREFERENCES_ACTION = self.tr("&Options")
+                PREFERENCES_ACTION = self.tr("&Settings")
                 QUIT_ACTION = self.tr("Exit")
             else:
                 PREFERENCES_ACTION = self.tr("&Preferences")
@@ -80,10 +102,16 @@ class MainWindow(QMainWindow):
             aboutAction = helpMenu.addAction(ABOUT_ACTION)
 
         aboutAction.triggered.connect(self.showAbout)
+        aboutAction.setMenuRole(QAction.AboutRole)
+        preferencesAction.setShortcut(QKeySequence.Preferences)
         preferencesAction.triggered.connect(self.showPreferences)
+        preferencesAction.setMenuRole(QAction.PreferencesRole)
         # Work around QTBUG-65245
         quitAction.setShortcut(QKeySequence.Quit)
         quitAction.triggered.connect(QApplication.instance().quit)
+        quitAction.setMenuRole(QAction.QuitRole)
+
+        self.setMenuBar(mb)
 
     @pyqtSlot()
     def showOpenFile(self):
@@ -130,7 +158,11 @@ class MainWindow(QMainWindow):
 
     def _createSpinnerWidget(self):
         widget = QWidget(self)
-        # layout = QVBoxLayout()
+        layout = QHBoxLayout()
+        progressBar = QProgressBar(widget)
+        progressBar.setValue(0)
+        progressBar.setMinimum(0)
+        progressBar.setMaximum(0)
         # spinner = QSvgWidget(widget)
         # spinner.load('./ui/circles.svg')
         # spinner.setFixedSize(64, 64)
