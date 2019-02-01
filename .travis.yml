@@ -91,5 +91,5 @@ deploy:
     - dist/Subtitles-*.rpm
   on:
     repo: philipbel/Subtitles
-    # branch: release
-    # tags: true
+    branch: master
+    tags: true
