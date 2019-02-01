@@ -63,7 +63,10 @@ before_deploy:
   - export TRAVIS_TAG=$VERSION
   - echo "TRAVIS_TAG=${TRAVIS_TAG}"
   - echo "TRAVIS_OS_NAME=$TRAVIS_OS_NAME"
-  - git tag release-$TRAVIS_TAG
+  # TODO: Run tests and only then tag?
+  # - git tag release-$TRAVIS_TAG
+  - pwd
+  - ls dist/
   - ls dist/Subtitles-*.dmg
   - ls dist/Subtitles-*.zip
   - ls dist/Subtitles-*-Setup.exe
