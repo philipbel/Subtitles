@@ -94,7 +94,7 @@ package-Linux:
 	@ls -la $(DISTDIR)
 
 
-depends: depends-$(PLATFORM) Pipfile.lock pip-version
+depends: depends-$(PLATFORM) pip-version Pipfile.lock
 
 
 pip-version:
