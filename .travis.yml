@@ -20,7 +20,7 @@ matrix:
           packages:
             - nsis
       before_install:
-        - sudo pip install pipenv
+        - sudo pip3 install pipenv
       # script:
     - os: osx
       language: generic
