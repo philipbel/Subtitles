@@ -1,5 +1,7 @@
 #!/usr/bin/env make
 
+SHELL := /bin/bash
+
 DISTDIR := dist
 
 PIPENV := pipenv
@@ -58,10 +60,7 @@ diag:
 	@echo "PIP_INSTALL=$(PIP_INSTALL)"
 
 
-build: $(DISTDIR)
-
-
-$(DISTDIR): Subtitles.pyinstaller.spec
+build:
 	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
 
 
@@ -126,5 +125,5 @@ clean:
 	$(RM) -r build dist
 
 
-.PHONY: err diag clean
+.PHONY: err diag clean build
 err: ; $(ERROR)
