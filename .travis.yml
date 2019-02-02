@@ -91,6 +91,6 @@ deploy:
       - dist/Subtitles-*.rpm
     on:
       repo: philipbel/Subtitles
-      branch: master
+      # branch: master
       skip_cleanup: true
       # tags: true
