@@ -75,14 +75,6 @@ a = Analysis(
     cipher=block_cipher)
 
 
-# print(type(a.binaries))
-# print(type(a.binaries[0]))
-# print(type(a.binaries[0][0]))
-print(a.binaries[0])
-print(a.binaries[1])
-print(a.binaries[2])
-
-
 QT_MODULE_EXCLUDES = [
     'QtBluetooth',
     # 'QtDBus',  # Needed by libqcocoa.dylib
@@ -125,7 +117,6 @@ new_binaries = []
 for module, file, typ in a.binaries:
     should_exclude = False
     for qt_mod in MODULE_EXCLUDES:
-        print(f"qt_mod={qt_mod}, module={module}")
         if qt_mod in module:
             should_exclude = True
     if 'PyQt5/Qt/qml/' in file \
@@ -142,7 +133,6 @@ for module, file, typ in a.binaries:
             or 'QtWebEngineCore.framework' in file:
         should_exclude = True
     if should_exclude:
-        print("*** Excluding: {}".format(module))
         continue
     new_binaries.append((module, file, typ))
 
@@ -152,7 +142,6 @@ for module, file, typ in a.datas:
     if module.startswith('PyQt5/Qt/qml/') \
             or module.startswith('PyQt5/Qt/lib/QtWebEngineCore.framework') \
             or module.startswith('PyQt5/Qt/translations'):
-        print("*** Excluding {}".format(module))
         continue
     new_datas.append((module, file, type))
 
@@ -161,12 +150,12 @@ a.binaries = TOC(initlist=new_binaries)
 a.datas = TOC(initlist=new_datas)
 
 
-for attrib in ['scripts', 'pure', 'binaries', 'datas', 'zipfiles']:
-    fn = attrib + '.txt'
-    with open(fn, 'wb+') as fp:
-        for m, f, t in getattr(a, attrib):
-            fp.write("({}, {}, {})\n".format(m, f, t).encode('utf-8'))
-    print('*** {} written to {}'.format(attrib, fn))
+# for attrib in ['scripts', 'pure', 'binaries', 'datas', 'zipfiles']:
+#     fn = attrib + '.txt'
+#     with open(fn, 'wb+') as fp:
+#         for m, f, t in getattr(a, attrib):
+#             fp.write("({}, {}, {})\n".format(m, f, t).encode('utf-8'))
+#     print('*** {} written to {}'.format(attrib, fn))
 
 
 pyz = PYZ(a.pure,
