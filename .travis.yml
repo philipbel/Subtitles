@@ -92,4 +92,4 @@ deploy:
   on:
     repo: philipbel/Subtitles
     branch: master
-    tags: true
+    # tags: true
