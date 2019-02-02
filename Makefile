@@ -115,7 +115,7 @@ pip-version:
 	fi
 
 Pipfile.lock: Pipfile
-	$(PIPENV) update
+	$(PIPENV) sync
 
 
 depends-Windows:

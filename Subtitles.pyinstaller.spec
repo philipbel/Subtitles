@@ -46,6 +46,8 @@ data_files = [
 ]
 if path.exists('doc/VERSION.commit'):
     data_files.append(('doc/VERSION.commit', RESOURCES_DIR))
+if path.exists('doc/VERSION.build_host'):
+    data_files.append(('doc/VERSION.build_host', RESOURCES_DIR))
 
 a = Analysis(
     [path.join(path.abspath('.'), 'main.py')],
