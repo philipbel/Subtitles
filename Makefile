@@ -66,8 +66,11 @@ build:
 	@if [ -n "$(TRAVIS_COMMIT)" ]; then \
 		echo "$(TRAVIS_COMMIT)" > doc/VERSION.commit; \
 	fi
-	@if [ -n "$(TRAVIS_APP_HOST)" ]; then \
-		echo "$(TRAVIS_APP_HOST)" > doc/VERSION.build_host; \
+	@if [ -n "${TRAVIS_APP_HOST}" ]; then \
+		echo "${TRAVIS_APP_HOST}" > doc/VERSION.build_host; \
+	fi
+	@if [ -n "${TRAVIS_BUILD_NUMBER}" ]; then \
+		echo "${TRAVIS_BUILD_NUMBER}" > doc/VERSION.build_number; \
 	fi
 	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
 
