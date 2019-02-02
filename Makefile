@@ -63,8 +63,11 @@ diag:
 
 
 build:
-	@if [ -n "$(GIT_COMMIT)" ]; then \
-		echo "$(GIT_COMMIT)" > doc/VERSION.commit; \
+	@if [ -n "$(TRAVIS_COMMIT)" ]; then \
+		echo "$(TRAVIS_COMMIT)" > doc/VERSION.commit; \
+	fi
+	@if [ -n "$(TRAVIS_APP_HOST)" ]; then \
+		echo "$(TRAVIS_APP_HOST)" > doc/VERSION.build_host; \
 	fi
 	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
 
