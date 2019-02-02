@@ -92,4 +92,5 @@ deploy:
   on:
     repo: philipbel/Subtitles
     branch: master
+    skip_cleanup: true
     # tags: true
