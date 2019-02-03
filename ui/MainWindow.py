@@ -5,6 +5,14 @@ import ui.worker
 import sys
 import requests
 from os import path
+from typing import (
+    List
+)
+import rx
+import rx.subjects
+import rx.concurrency
+import rx.concurrency.mainloopscheduler
+from PyQt5 import QtCore
 from PyQt5.Qt import (
     pyqtSlot,
     QAction,
@@ -54,6 +62,15 @@ class MainWindow(QMainWindow):
         self._threadPool = QThreadPool.globalInstance()
 
         self._initUi()
+
+        self._rxScheduler = rx.concurrency.mainloopscheduler.QtScheduler(QtCore)
+
+        def on_next(files: List[str]):
+            logger.debug(f"on_next() received {len(files)} file(s).")
+
+        self._subjectVideoFiles = rx.subjects.Subject()
+        self._subjectVideoFiles.subscribe_(scheduler=self._rxScheduler,
+                                          on_next=on_next)
 
     def _initUi(self):
         self._instructionWidget = self._createInstructionWidget()
@@ -201,16 +218,27 @@ class MainWindow(QMainWindow):
         e.acceptProposedAction()
 
     def dragMoveEvent(self, e):
+        # TODO: Validate?
         e.acceptProposedAction()
 
     def dragLeaveEvent(self, e):
+        # TODO: Validate?
         e.accept()
 
     def dropEvent(self, e):
+        # TODO: Validate?
         e.acceptProposedAction()
+
+        files = []
         for url in e.mimeData().urls():
             filename = url.toLocalFile()
-            self._processFile(filename)
+            # self._processFile(filename)
+            files.append(filename)
+
+        logger.debug(f"Subject sending {len(files)} file(s).")
+        self._subjectVideoFiles.on_next(files)
+        logger.debug("Subject completing.")
+        self._subjectVideoFiles.on_completed()
 
     def _onSubtitlesFound(self, filePath, subtitles):
         logger.debug(

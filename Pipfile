@@ -10,6 +10,7 @@ python-opensubtitles = {git = "https://github.com/agonzalezro/python-opensubtitl
 requests = "*"
 pyinstaller = "*"
 pywin32-ctypes = {version = "*",sys_platform = "== 'win32'"}
+rx = "*"
 
 [dev-packages]
 "autopep8" = "*"
@@ -22,3 +23,6 @@ pywin32 = {version = "*",sys_platform = "== 'win32'"}
 
 [requires]
 python_version = "3.7"
+
+[pipenv]
+allow_prereleases = true
