@@ -96,3 +96,8 @@ ENV/
 
 *.code-workspace
 doc/VERSION.commit
+
+
+# npm
+node_modules/
+package-lock.json
