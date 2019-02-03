@@ -21,6 +21,7 @@ matrix:
             - nsis
       before_install:
         - sudo pip install --upgrade pipenv
+        - curl -s https://packagecloud.io/install/repositories/packpack/packpack/script.deb.sh | sudo bash
       # script:
     - os: osx
       language: generic
