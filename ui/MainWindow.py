@@ -4,17 +4,25 @@ import gzip
 import ui.worker
 import sys
 import requests
+from typing import Dict
+# from statemachine import State, StateMachine
 from os import path
 from PyQt5.Qt import (
     pyqtSlot,
     QAction,
     QApplication,
     QErrorMessage,
+    QEvent,
+    QEventTransition,
+    QFinalState,
     QKeySequence,
     QMainWindow,
     QMenu,
     QMimeDatabase,
     QMimeType,
+    QObject,
+    QState,
+    QStateMachine,
     Qt,
     QThreadPool,
 )
@@ -42,6 +50,35 @@ from tempfile import NamedTemporaryFile
 
 PROG = 'Subtitles'
 
+# class DragDropStateMachine(StateMachine, QOBject):   
+#     accepts_files = State(name='Accepts Files', initial=True)
+#     files_being_dropped = State(name='Files Being Dropped')
+#     files_dropped = State(name='Files Dropped')
+
+#     search_in_progress = State(name='Search in Progress')
+#     no_results = State(name='No Results')
+#     results_ready = State(name='Results Ready')
+    
+#     # subtitle_downloading = State(name='Subtitle Downloading')
+#     # subtitle_downloaded = State(name='Subtitled Downloaded')
+#     # video_launching = State(name='Video Launching')
+#     # video_launched = State(name='Video Launched')
+#     error = State(name='Error')
+#     retry = State(name='Retry')
+
+#     drop_files = accepts_files.to(files_being_dropped)
+#     accept_dropped_files = files_being_dropped.to(files_dropped)
+#     dismiss_dropped_files = files_being_dropped.to(accepts_files)
+    
+#     # search_subtitles = files_dropped.to(search_in_progress)
+#     # results_ready = search_in_progress.to(results_ready)
+#     # results_error = search_in_progress.to(results)
+
+
+
+#     def __init__(self, parent=None):
+#         super(QObject, self).__init__(parent)
+
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -54,6 +91,9 @@ class MainWindow(QMainWindow):
         self._threadPool = QThreadPool.globalInstance()
 
         self._initUi()
+
+        self._initStateMachine()
+        self._sm.start()
 
     def _initUi(self):
         self._instructionWidget = self._createInstructionWidget()
@@ -79,8 +119,8 @@ class MainWindow(QMainWindow):
         openMovieAction.setShortcut(QKeySequence.Open)
 
         if sys.platform == 'darwin':
-            # XXX: Keep this in the "File" menu.  Qt on macOS will automatically
-            # move them to the correct location.
+            # XXX: Keep this in the "File" menu.  Qt on macOS will
+            # automatically move them to the correct location.
             # Adding them to the QMenuBar directly does not work.
             quitAction = fileMenu.addAction("Quit")
             aboutAction = fileMenu.addAction("About")
@@ -189,16 +229,38 @@ class MainWindow(QMainWindow):
         code = prefDialog.exec_()
         logger.debug("Preference dialog code: {}".format(code))
 
-    def dragEnterEvent(self, e):
-        logger.debug("mime: {}".format(e.mimeData().formats()))
-        if not e.mimeData().hasUrls():
-            # e.ignore()
-            return
-        for url in e.mimeData().urls():
-            if not url.isLocalFile():
+    # def dragEnterEvent(self, e):
+    #     logger.debug("mime: {}".format(e.mimeData().formats()))
+    #     if not e.mimeData().hasUrls():
+    #         # e.ignore()
+    #         return
+    #     files = []
+    #     for url in e.mimeData().urls():
+    #         if not url.isLocalFile():
+    #             # e.ignore()
+    #             return
+    #         files.append(url.fileName())
+    #     e.acceptProposedAction()
+
+    class DragEnterEventTransition(QEventTransition):
+        def __init__(self, parent=None):
+            super().__init__(parent=parent)
+        
+        def eventTest(self, event: QEvent) -> bool:
+            if not super().eventTest(event):
+                return
+            event = QStateMachine.WrappedEvent().event()
+            logger.debug("mime: {}".format(event.mimeData().formats()))
+            if not event.mimeData().hasUrls():
                 # e.ignore()
                 return
-        e.acceptProposedAction()
+            files = []
+            for url in event.mimeData().urls():
+                if not url.isLocalFile():
+                    # e.ignore()
+                    return
+                files.append(url.fileName())
+            event.acceptProposedAction()
 
     def dragMoveEvent(self, e):
         e.acceptProposedAction()
@@ -289,3 +351,119 @@ class MainWindow(QMainWindow):
                        partial(self._onHashCalculated, filePath),
                        self._subService.calculate_hash,
                        filePath)
+
+    def _createAndAddState(self, name: str = '', final: bool = False) -> QState:
+        if final:
+            state = QFinalState()
+        else:
+            state = QState()
+        state.setObjectName(name)
+        self._sm.addState(state)
+        return state
+
+    # states = {
+    #     'AcceptsFiles': {
+    #         'initial': True,
+    #         'to': [
+
+    #         ]
+    #     },
+    #     'FilesAreBeingDropped': {
+    #         'to': [
+    #         ]
+    #     },
+    #     'FilesWereDropped': {
+    #         'to': [
+    #         ]
+    #     },
+
+    #     'SearchIsInProgress': {
+    #         'to': [
+    #         ]
+    #     },
+    #     'SearchFoundNoResults': {
+    #         'to': [
+    #         ]
+    #     },
+    #     'SearchResultsAreReady': {
+    #         'to': [
+    #         ]
+    #     },
+    #     'SearchError': {
+    #         'to': [
+    #         ]
+    #     },
+    
+    #     'SubtitleIsDownloading': {
+    #         'to': [
+    #         ]
+    #     },
+    #     'SubtitleWasDownloaded': {
+    #         'to': [
+    #         ]
+    #     },
+    #     'SubtitleDownloadError': {
+    #         'to': [
+    #         ]
+    #     },
+
+    #     'VideoIsLaunching': {
+    #         'to': [
+    #         ]
+    #     },
+    #     'VideoWasLaunched': {
+    #         'to': [
+    #         ]
+    #     },
+    #     'VideoDownloadError': {
+    #         'to': [
+    #         ]
+    #     },
+    # }
+
+    # def _initStates(self,
+    #                 stateMachine: QStateMachine,
+    #                 states: Dict[str, Dict]):
+    #     for name, d in states.items():
+    #         state = QState()
+    #         state.setObjectName(d[name])
+    #         d['object'] = state
+    #         setattr(self, 'state' + name, d)
+    #         stateMachine.addState(state)
+    #     for name, d in states.items():
+    #         for to_name in d.get('to', []):
+    #             to_state = states[to_name]
+    #             if not to_state:
+    #                 logger.warn(f"Unable to find state named '{to_name}'")
+    #                 return
+    #             stateMachine.
+
+    def _initStateMachine(self):
+        self._sm = QStateMachine(self)
+
+        # self._initStates()
+
+        # Dragging and dropping files.
+        self._stateAcceptsFiles = self._createAndAddState()
+        self._stateFilesAreBeingDropped = self._createAndAddState()
+        self._stateFilesWereDropped = self._createAndAddState()
+        # Subtitle search
+        self._stateSearchIsInProgress = self._createAndAddState()
+        self._stateSearchError = self._createAndAddState()
+        self._stateSearchIsInProgress.setErrorState(self._stateSearchError)
+        self._stateSearchFoundNoResults = self._createAndAddState()
+        self._stateSearchResultsAreReady = self._createAndAddState()
+        # Subtitle download
+        self._stateSubtitleIsDownloading = self._createAndAddState()
+        self._stateSubtitleWasDownloaded = self._createAndAddState()
+        self._stateSubtitleDownloadError = self._createAndAddState()
+        # After a subtitle has been downloaded
+        self._stateVideoIsLaunching = self._createAndAddState()
+        self._stateVideoWasLaunched = self._createAndAddState(final=True)
+        self._stateVideoDownloadError = self._createAndAddState()
+
+        self._stateAcceptsFiles.addTransition(self._stateFilesAreBeingDropped)
+        self._stateFilesAreBeingDropped.addTransition(self._stateFilesWereDropped)
+        self._stateFilesWereDropped.addTransition(self._stateSearchIsInProgress)
+
+        self._sm.setInitialState(self._stateAcceptsFiles)
