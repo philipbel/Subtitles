@@ -97,10 +97,6 @@ class AboutDialog(QDialog):
         versionInfoLayout.setVerticalSpacing(0)
         row = 0
         for name, value in version_labels:
-            name.setStyleSheet("background-color: red")
-            value.setStyleSheet("background-color: green")
-            name.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-            value.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
             name.setText(name.text() + ':')
             versionInfoLayout.addWidget(name, row, 0, Qt.AlignRight)
             versionInfoLayout.addWidget(value, row, 1, Qt.AlignLeft)
@@ -115,6 +111,22 @@ class AboutDialog(QDialog):
         mainLayout.addLayout(centralLayout)
         mainLayout.addLayout(linksLayout)
         mainLayout.addWidget(licenseLabel)
+
+        if sys.platform != 'darwin':
+            buttonBox = QDialogButtonBox(QDialogButtonBox.Close)
+            buttonBox.setCenterButtons(True)
+            buttonBox.button(QDialogButtonBox.Close).clicked.connect(
+                self.reject
+            )
+
+            line = QFrame()
+            line.setFrameShape(QFrame.HLine)
+            line.setFrameShadow(QFrame.Sunken)
+
+            mainLayout.addSpacing(8)
+            mainLayout.addWidget(line)
+            mainLayout.addSpacing(8)
+            mainLayout.addWidget(buttonBox)
 
     def _createLinkLabel(self, text: str, href: str = None) -> QLabel:
         linkLabel = QLabel()
@@ -178,10 +190,6 @@ class AboutDialog(QDialog):
                 "Error reading file '{}': {}".format(filename, e))
         return None
 
-    # def _ge(self, resource):
-    #     value = AboutDialog._readFile(resource)
-    #     return self._createSelectableLabel(value)
-
     _VERSION_LABELS = [
         {'label': Application.translate(
             'AboutDialog', 'Version'), 'file': 'VERSION'},
@@ -212,9 +220,10 @@ class AboutDialog(QDialog):
                 if not value:
                     continue
             versionLabel = QLabel(label_text)
-            # versionLabel.sizePolicy().setVerticalPolicy(QSizePolicy.Maximum)
+            versionLabel.setSizePolicy(
+                QSizePolicy.Maximum, QSizePolicy.Maximum)
             versionValueLabel = self._createSelectableLabel(value)
-            # versionValueLabel.sizePolicy().setVerticalPolicy(
-            #     QSizePolicy.Maximum)
+            versionValueLabel.setSizePolicy(QSizePolicy.Maximum,
+                                            QSizePolicy.Maximum)
             version_labels.append((versionLabel, versionValueLabel))
         return version_labels
