@@ -244,15 +244,6 @@
             "markers": "sys_platform == 'win32'",
             "version": "==224"
         },
-        "pywin32-ctypes": {
-            "hashes": [
-                "sha256:24ffc3b341d457d48e8922352130cf2644024a4ff09762a2261fd34c36ee5942",
-                "sha256:9dc2d991b3479cc2df15930958b674a48a227d5361d413827a4cfd0b5876fc98"
-            ],
-            "index": "pypi",
-            "markers": "sys_platform == 'win32'",
-            "version": "==0.2.0"
-        },
         "rope": {
             "hashes": [
                 "sha256:a108c445e1cd897fe19272ab7877d172e7faf3d4148c80e7d20faba42ea8f7b2"

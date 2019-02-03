@@ -80,6 +80,24 @@ PROG = 'Subtitles'
 #         super(QObject, self).__init__(parent)
 
 
+class State(QState):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.data = {}
+        
+    def onEntry(self, e: QEvent):
+        if e.type() == QEvent.StateMachineSignal:
+            signalEvent: QStateMachine.SignalEvent = QStateMachine.SignalEvent(e)
+            args = signalEvent.arguments()
+            if args:
+                d = args[0]
+                if isinstance(d, dict):
+                    self.data = d
+WIP
+
+
+
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -93,6 +111,13 @@ class MainWindow(QMainWindow):
         self._initUi()
 
         self._initStateMachine()
+
+        eventTransition = QEventTransition(self, QEvent.Drop)
+        eventTransition.setTargetState(self._stateFilesWereDropped)
+        self._stateAcceptsFiles.addTransition(eventTransition)
+        self._stateFilesWereDropped.entered.connect(
+            lambda: print(f"Dropped"))
+
         self._sm.start()
 
     def _initUi(self):
@@ -108,10 +133,8 @@ class MainWindow(QMainWindow):
         self.setAcceptDrops(True)
 
     def _initMenu(self):
-        # mb = self.menuBar()
         self.setMenuBar(None)
         mb = QMenuBar(parent=None)
-        # self.setMenuBar(mb)
 
         fileMenu = mb.addMenu(self.tr("&File"))
         openMovieAction = fileMenu.addAction(self.tr("&Open Movie..."))
@@ -269,10 +292,11 @@ class MainWindow(QMainWindow):
         e.accept()
 
     def dropEvent(self, e):
+        logger.debug("dropEvent")
         e.acceptProposedAction()
         for url in e.mimeData().urls():
             filename = url.toLocalFile()
-            self._processFile(filename)
+            # self._processFile(filename)  # DEBUG: Disabled
 
     def _onSubtitlesFound(self, filePath, subtitles):
         logger.debug(
