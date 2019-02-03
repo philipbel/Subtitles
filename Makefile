@@ -11,12 +11,14 @@ PIP_REQUIRED_VERSION := '18.1'
 VERSION := $(shell cat doc/VERSION)
 GIT_COMMIT := $(shell git log --pretty=format:'%h' -n 1)
 
+CREATE_DMG := node_modules/create-dmg/cli.js
 
-NAME_VERSION := Subtitles-$(VERSION)
-DMG_FILE := $(DISTDIR)/$(NAME_VERSION).dmg
-DMG_SRCDIR := $(DISTDIR)/dmg_dir
+NAME := Subtitles
+NAME_VERSION = $(NAME)-$(VERSION)
+DMG_FILE = $(DISTDIR)/$(NAME_VERSION).dmg
+DMG_SRCDIR = $(DISTDIR)/dmg_dir
 # DMG_TEMP := $(shell mktemp)
-APP_BUNDLE := $(DISTDIR)/Subtitles.app
+APP_BUNDLE = $(DISTDIR)/Subtitles.app
 
 EXE := $(DISTDIR)/Subtitles/Subtitles.exe
 ZIP_FILE := $(DISTDIR)/$(NAME_VERSION).zip
@@ -82,14 +84,16 @@ package: build package-$(PLATFORM)
 package-Darwin: $(DMG_FILE)
 
 $(DMG_FILE):
-	$(RM) -r "$(DMG_SRCDIR)"
-	mkdir -p "$(DMG_SRCDIR)"
-	mv "$(APP_BUNDLE)" "$(DMG_SRCDIR)"
-	hdiutil create "$(DMG_FILE)" \
-		-srcfolder "$(DMG_SRCDIR)" \
-		-format UDBZ \
-		-volname "$(NAME_VERSION)"
-	$(RM) -r "$(DMG_SRCDIR)"
+	@if $(CREATE_DMG) --overwrite "$(APP_BUNDLE)" "$(DISTDIR)" \
+		| grep 'No usable identity found'; then \
+		if [ ! -f "$(DISTDIR)/$(NAME) $(VERSION).dmg" ]; then \
+			echo "Code signing failed (normal), but DMG not created."; \
+			exit 1; \
+		fi ; \
+		echo "Warning: Unable to code sign DMG"; \
+	fi
+	mv "$(DISTDIR)/$(NAME) $(VERSION).dmg" "$(DISTDIR)/$(NAME_VERSION).dmg"
+
 
 
 

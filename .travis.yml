@@ -32,6 +32,8 @@ matrix:
           packages:
             - nsis
             - pipenv
+      before_install:
+        - npm install ManRueda/create-dmg
     - os: windows
       language: shell
       before_install:
