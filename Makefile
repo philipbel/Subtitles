@@ -22,6 +22,8 @@ APP_BUNDLE = $(DISTDIR)/Subtitles.app
 
 EXE := $(DISTDIR)/Subtitles/Subtitles.exe
 ZIP_FILE := $(DISTDIR)/$(NAME_VERSION).zip
+ZIP_FILE_WINDOWS := $(DISTDIR)/$(NAME_VERSION)-Windows.zip
+ZIP_FILE_LINUX := $(DISTDIR)/$(NAME_VERSION)-Linux.zip
 
 
 PLATFORM := $(shell uname -s)
@@ -97,7 +99,11 @@ $(DMG_FILE):
 
 
 
-package-Windows: $(ZIP_FILE)
+package-Windows: $(ZIP_FILE_WINDOWS)
+
+$(ZIP_FILE_WINDOWS): $(ZIP_FILE)
+	mv "$(ZIP_FILE)" "$(ZIP_FILE_WINDOWS)"
+
 
 $(ZIP_FILE): $(DISTDIR)
 	$(RM) $(ZIP_FILE)
@@ -105,7 +111,10 @@ $(ZIP_FILE): $(DISTDIR)
 	@echo "ZIP File $(ZIP_FILE) created."
 
 
-package-Linux: $(ZIP_FILE)
+package-Linux: $(ZIP_FILE_LINUX)
+
+$(ZIP_FILE_LINUX): $(ZIP_FILE)
+	mv "$(ZIP_FILE)" "$(ZIP_FILE)"
 
 
 depends: depends-$(PLATFORM) pip-version Pipfile.lock
