@@ -4,13 +4,15 @@ import gzip
 import ui.worker
 import sys
 import requests
-from typing import Dict
+from functools import partial, partialmethod
 # from statemachine import State, StateMachine
 from os import path
 from PyQt5.Qt import (
+    pyqtSignal,
     pyqtSlot,
     QAction,
     QApplication,
+    QEasingCurve,
     QErrorMessage,
     QEvent,
     QEventTransition,
@@ -21,6 +23,9 @@ from PyQt5.Qt import (
     QMimeDatabase,
     QMimeType,
     QObject,
+    QPropertyAnimation,
+    QSequentialAnimationGroup,
+    QSignalTransition,
     QState,
     QStateMachine,
     Qt,
@@ -28,6 +33,7 @@ from PyQt5.Qt import (
 )
 from PyQt5.QtWidgets import (
     QFileDialog,
+    QGraphicsOpacityEffect,
     QLabel,
     QMenuBar,
     QProgressBar,
@@ -50,7 +56,7 @@ from tempfile import NamedTemporaryFile
 
 PROG = 'Subtitles'
 
-# class DragDropStateMachine(StateMachine, QOBject):   
+# class DragDropStateMachine(StateMachine, QObject):
 #     accepts_files = State(name='Accepts Files', initial=True)
 #     files_being_dropped = State(name='Files Being Dropped')
 #     files_dropped = State(name='Files Dropped')
@@ -58,7 +64,7 @@ PROG = 'Subtitles'
 #     search_in_progress = State(name='Search in Progress')
 #     no_results = State(name='No Results')
 #     results_ready = State(name='Results Ready')
-    
+
 #     # subtitle_downloading = State(name='Subtitle Downloading')
 #     # subtitle_downloaded = State(name='Subtitled Downloaded')
 #     # video_launching = State(name='Video Launching')
@@ -69,7 +75,7 @@ PROG = 'Subtitles'
 #     drop_files = accepts_files.to(files_being_dropped)
 #     accept_dropped_files = files_being_dropped.to(files_dropped)
 #     dismiss_dropped_files = files_being_dropped.to(accepts_files)
-    
+
 #     # search_subtitles = files_dropped.to(search_in_progress)
 #     # results_ready = search_in_progress.to(results_ready)
 #     # results_error = search_in_progress.to(results)
@@ -80,23 +86,28 @@ PROG = 'Subtitles'
 #         super(QObject, self).__init__(parent)
 
 
-class State(QState):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+# class State(QState):
+#     def __init__(self, parent=None):
+#         super().__init__(parent)
 
-        self.data = {}
-        
-    def onEntry(self, e: QEvent):
-        if e.type() == QEvent.StateMachineSignal:
-            signalEvent: QStateMachine.SignalEvent = QStateMachine.SignalEvent(e)
-            args = signalEvent.arguments()
-            if args:
-                d = args[0]
-                if isinstance(d, dict):
-                    self.data = d
-WIP
+#         self.data = {}
+
+#     def onEntry(self, e: QEvent):
+#         if e.type() == QEvent.StateMachineSignal:
+#             signalEvent: QStateMachine.SignalEvent = QStateMachine.SignalEvent(e)
+#             args = signalEvent.arguments()
+#             if args:
+#                 d = args[0]
+#                 if isinstance(d, dict):
+#                     self.data = d
 
 
+# class StateMachine(QStateMachine):
+#     def __init__(self, parent=None):
+#         super().__init__(parent)
+
+#     @pyqtSlot
+#     def searchForSubtitles
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -112,21 +123,13 @@ class MainWindow(QMainWindow):
 
         self._initStateMachine()
 
-        eventTransition = QEventTransition(self, QEvent.Drop)
-        eventTransition.setTargetState(self._stateFilesWereDropped)
-        self._stateAcceptsFiles.addTransition(eventTransition)
-        self._stateFilesWereDropped.entered.connect(
-            lambda: print(f"Dropped"))
-
-        self._sm.start()
-
     def _initUi(self):
-        self._instructionWidget = self._createInstructionWidget()
+        self._initCentralWidget()
+
         self._spinnerWidget = self._createSpinnerWidget()
         self._spinnerWidget.setVisible(False)
         self._initMenu()
 
-        self.setCentralWidget(self._instructionWidget)
         self.setWindowTitle(self.tr(PROG))
         self.setUnifiedTitleAndToolBarOnMac(True)
         self.resize(320, 240)
@@ -232,16 +235,15 @@ class MainWindow(QMainWindow):
         # layout.addWidget(spinner)
         return widget
 
-    def _createInstructionWidget(self):
-        widget = QWidget(self)
+    def _initCentralWidget(self):
+        centralWidget = QWidget(self)
         layout = QVBoxLayout()
-        widget.setLayout(layout)
+        centralWidget.setLayout(layout)
+        self.setCentralWidget(centralWidget)
 
-        label = QLabel(self.tr('Drop Files Here'), widget)
-        label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label)
-
-        return widget
+        self._instructionWidget = QLabel(self.tr('Drag Movies Here'))
+        self._instructionWidget.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self._instructionWidget)
 
     @pyqtSlot()
     def showPreferences(self):
@@ -252,38 +254,40 @@ class MainWindow(QMainWindow):
         code = prefDialog.exec_()
         logger.debug("Preference dialog code: {}".format(code))
 
-    # def dragEnterEvent(self, e):
-    #     logger.debug("mime: {}".format(e.mimeData().formats()))
-    #     if not e.mimeData().hasUrls():
-    #         # e.ignore()
-    #         return
-    #     files = []
-    #     for url in e.mimeData().urls():
-    #         if not url.isLocalFile():
-    #             # e.ignore()
-    #             return
-    #         files.append(url.fileName())
-    #     e.acceptProposedAction()
-
-    class DragEnterEventTransition(QEventTransition):
-        def __init__(self, parent=None):
-            super().__init__(parent=parent)
-        
-        def eventTest(self, event: QEvent) -> bool:
-            if not super().eventTest(event):
-                return
-            event = QStateMachine.WrappedEvent().event()
-            logger.debug("mime: {}".format(event.mimeData().formats()))
-            if not event.mimeData().hasUrls():
+    def dragEnterEvent(self, e):
+        logger.debug("mime: {}".format(e.mimeData().formats()))
+        if not e.mimeData().hasUrls():
+            # e.ignore()
+            return
+        files = []
+        for url in e.mimeData().urls():
+            if not url.isLocalFile():
                 # e.ignore()
                 return
-            files = []
-            for url in event.mimeData().urls():
-                if not url.isLocalFile():
-                    # e.ignore()
-                    return
-                files.append(url.fileName())
-            event.acceptProposedAction()
+            files.append(url.fileName())
+        e.acceptProposedAction()
+        logger.debug(f"Emitting 'videoFilesAreBeingDropped'")
+        self.videoFilesAreBeingDropped.emit(files)
+
+    # class DragEnterEventTransition(QEventTransition):
+    #     def __init__(self, parent=None):
+    #         super().__init__(parent=parent)
+
+    #     def eventTest(self, event: QEvent) -> bool:
+    #         if not super().eventTest(event):
+    #             return
+    #         event = QStateMachine.WrappedEvent().event()
+    #         logger.debug("mime: {}".format(event.mimeData().formats()))
+    #         if not event.mimeData().hasUrls():
+    #             # e.ignore()
+    #             return
+    #         files = []
+    #         for url in event.mimeData().urls():
+    #             if not url.isLocalFile():
+    #                 # e.ignore()
+    #                 return
+    #             files.append(url.fileName())
+    #         event.acceptProposedAction()
 
     def dragMoveEvent(self, e):
         e.acceptProposedAction()
@@ -294,9 +298,12 @@ class MainWindow(QMainWindow):
     def dropEvent(self, e):
         logger.debug("dropEvent")
         e.acceptProposedAction()
+        files = []
         for url in e.mimeData().urls():
             filename = url.toLocalFile()
+            files.append(files)
             # self._processFile(filename)  # DEBUG: Disabled
+        self.searchForSubtitles.emit(files)
 
     def _onSubtitlesFound(self, filePath, subtitles):
         logger.debug(
@@ -417,7 +424,7 @@ class MainWindow(QMainWindow):
     #         'to': [
     #         ]
     #     },
-    
+
     #     'SubtitleIsDownloading': {
     #         'to': [
     #         ]
@@ -462,6 +469,9 @@ class MainWindow(QMainWindow):
     #                 return
     #             stateMachine.
 
+    videoFilesAreBeingDropped = pyqtSignal(list)
+    searchForSubtitles = pyqtSignal(list)
+
     def _initStateMachine(self):
         self._sm = QStateMachine(self)
 
@@ -486,8 +496,22 @@ class MainWindow(QMainWindow):
         self._stateVideoWasLaunched = self._createAndAddState(final=True)
         self._stateVideoDownloadError = self._createAndAddState()
 
-        self._stateAcceptsFiles.addTransition(self._stateFilesAreBeingDropped)
-        self._stateFilesAreBeingDropped.addTransition(self._stateFilesWereDropped)
-        self._stateFilesWereDropped.addTransition(self._stateSearchIsInProgress)
+        # Transitions
+        # self._stateAcceptsFiles.addTransition(self._stateFilesAreBeingDropped)
+        # self._stateFilesAreBeingDropped.addTransition(self._stateFilesWereDropped)
+        # self._stateFilesWereDropped.addTransition(self._stateSearchIsInProgress)
+
+        self._stateAcceptsFiles.addTransition(
+            self.videoFilesAreBeingDropped, self._stateFilesAreBeingDropped)
+        self._stateFilesAreBeingDropped.entered.connect(
+            partial(self._instructionWidget.setText,
+                    self.tr("Drop Movies to Search for Subtitles")))
+
+        self._stateFilesAreBeingDropped.addTransition(
+            self.searchForSubtitles, self._stateFilesWereDropped)
+        self._stateFilesWereDropped.entered.connect(
+            partial(self._instructionWidget.setText,
+            self.tr("Search in Progress")))
 
         self._sm.setInitialState(self._stateAcceptsFiles)
+        self._sm.start()
