@@ -303,6 +303,7 @@ class MainWindow(QMainWindow):
             filename = url.toLocalFile()
             files.append(files)
             # self._processFile(filename)  # DEBUG: Disabled
+        logger.debug(f"Emitting searchForSubtitles: {len(files)} file(s)")
         self.searchForSubtitles.emit(files)
 
     def _onSubtitlesFound(self, filePath, subtitles):
