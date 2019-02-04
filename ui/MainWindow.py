@@ -4,6 +4,7 @@ import gzip
 import ui.worker
 import sys
 import requests
+from urllib.parse import urlparse
 from os import path
 from typing import (
     List
@@ -12,6 +13,9 @@ import rx
 import rx.subjects
 import rx.concurrency
 import rx.concurrency.mainloopscheduler
+import rx.operators as rxops
+# TODO: rx.from_ is missing the scheduler parameter.  File a bug.
+import rx.core.observable.fromiterable
 from PyQt5 import QtCore
 from PyQt5.Qt import (
     pyqtSlot,
@@ -25,11 +29,13 @@ from PyQt5.Qt import (
     QMimeType,
     Qt,
     QThreadPool,
+    QUrl,
 )
 from PyQt5.QtWidgets import (
     QFileDialog,
     QLabel,
     QMenuBar,
+    QMessageBox,
     QProgressBar,
     QHBoxLayout,
     QVBoxLayout,
@@ -64,13 +70,6 @@ class MainWindow(QMainWindow):
         self._initUi()
 
         self._rxScheduler = rx.concurrency.mainloopscheduler.QtScheduler(QtCore)
-
-        def on_next(files: List[str]):
-            logger.debug(f"on_next() received {len(files)} file(s).")
-
-        self._subjectVideoFiles = rx.subjects.Subject()
-        self._subjectVideoFiles.subscribe_(scheduler=self._rxScheduler,
-                                          on_next=on_next)
 
     def _initUi(self):
         self._instructionWidget = self._createInstructionWidget()
@@ -235,10 +234,75 @@ class MainWindow(QMainWindow):
             # self._processFile(filename)
             files.append(filename)
 
-        logger.debug(f"Subject sending {len(files)} file(s).")
-        self._subjectVideoFiles.on_next(files)
-        logger.debug("Subject completing.")
-        self._subjectVideoFiles.on_completed()
+        if not files:
+            # TODO: Reset message
+            return
+
+        if len(files) > 1:
+            # TODO: Support multiple files?
+            QMessageBox.warning(
+                self,
+                self.tr("Multiple Video Files"),
+                self.tr("You have dropped multiple files. This is not supported. "
+                        + "Please drag a single movie file into the window."),
+                QMessageBox.Ok)
+            return
+
+        # def on_next(files: List[str]):
+        #     logger.debug(f"on_next() received: '{files}'.")
+        #     raise Exception('Dummy')
+       
+        # def on_completed():
+        #     logger.debug(f"on_completed()")
+
+        # def on_error(e: Exception):
+        #     logger.error(e)
+
+        # logger.debug(f"_streamVideoFiles sending {files}.")
+        # rx.of(files[0]) \
+        #     .subscribe_(scheduler=self._rxScheduler,
+        #                 on_next=on_next,
+        #                 on_completed=on_completed,
+        #                 on_error=on_error)
+
+        def hashMovie(filename: str) -> str:
+            logger.debug(f"filename = '{filename}'")
+            return "deadbeef00c0ffee"
+
+        def searchForHash(hash: str) -> List[str]:
+            logger.debug(f"hash={hash}Raising exception")
+            # raise Exception('Exception from searchForHash')
+            return ['abc.srt']
+
+        def downloadSubtitle(url: str) -> str:
+            logger.debug(f"Downloading URL '{url}'")
+            to = path.basename(urlparse(url).path)
+            raise Exception(f"Downloading {url} to {to}")
+            return to
+
+        def downloadErrorHandler(e: Exception):
+            logger.debug(f"Handling ")
+            resp: int = QMessageBox.critical(
+                self,
+                self.tr('Download Error'),
+                self.tr(f"Download Error:\n{e}"),
+                QMessageBox.Retry,
+                QMessageBox.Cancel)
+            logger.debug(f"Retry? = {resp == QMessageBox.Retry}")
+            return rx.empty()
+
+        rx.just(files[0], scheduler=self._rxScheduler) \
+            .pipe(
+                rxops.map(hashMovie),
+                rxops.map(searchForHash),
+                # rxops.catch_exception(handler=handler),
+                # rxops.observe_on(rx.concurrency.NewThreadScheduler()),
+                # rxops.subscribe_on(self._rxScheduler),
+                rxops.map(downloadSubtitle),
+                # rxops.observe_on(self._rxScheduler),
+                rxops.catch_exception(handler=downloadErrorHandler)) \
+            .subscribe_(lambda x: logger.debug(f"Subscriber: {x}"),
+                        scheduler=self._rxScheduler)
 
     def _onSubtitlesFound(self, filePath, subtitles):
         logger.debug(
