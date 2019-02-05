@@ -1,9 +1,9 @@
 import shutil
 import os
 import gzip
-import ui.worker
 import sys
 import requests
+from enum import IntEnum, auto, unique
 from os import path
 from PyQt5.Qt import (
     pyqtSlot,
@@ -15,6 +15,7 @@ from PyQt5.Qt import (
     QMenu,
     QMimeDatabase,
     QMimeType,
+    QSizePolicy,
     Qt,
     QThreadPool,
 )
@@ -22,13 +23,15 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QLabel,
     QMenuBar,
+    QMessageBox,
     QProgressBar,
+    QStackedLayout,
     QHBoxLayout,
     QVBoxLayout,
     QWidget,
 )
 # from PyQt5.QtSvg import QSvgWidget
-from .worker import Worker
+from .task import Task
 from .PreferencesDialog import PreferencesDialog
 from .AboutDialog import AboutDialog
 # from pprint import pformat
@@ -56,12 +59,9 @@ class MainWindow(QMainWindow):
         self._initUi()
 
     def _initUi(self):
-        self._instructionWidget = self._createInstructionWidget()
-        self._spinnerWidget = self._createSpinnerWidget()
-        self._spinnerWidget.setVisible(False)
+        self._initCentralWidget()
         self._initMenu()
 
-        self.setCentralWidget(self._instructionWidget)
         self.setWindowTitle(self.tr(PROG))
         self.setUnifiedTitleAndToolBarOnMac(True)
         self.resize(320, 240)
@@ -156,29 +156,66 @@ class MainWindow(QMainWindow):
         dlg = AboutDialog(self)
         dlg.exec_()
 
-    def _createSpinnerWidget(self):
-        widget = QWidget(self)
-        layout = QHBoxLayout()
-        progressBar = QProgressBar(widget)
-        progressBar.setValue(0)
-        progressBar.setMinimum(0)
-        progressBar.setMaximum(0)
-        # spinner = QSvgWidget(widget)
-        # spinner.load('./ui/circles.svg')
-        # spinner.setFixedSize(64, 64)
-        # layout.addWidget(spinner)
-        return widget
+    @unique
+    class CentralPage(IntEnum):
+        HIDDEN = 0
+        DRAG_FILES = auto()
+        DROP_FILES = auto()
+        HASHING = auto()
+        SEARCHING = auto()
+        DOWNLOADING = auto()
+        LAUNCHING = auto()
 
-    def _createInstructionWidget(self):
-        widget = QWidget(self)
+    def _initCentralWidget(self):
+        centralWidget = QWidget(self)
         layout = QVBoxLayout()
-        widget.setLayout(layout)
+        self._stackLayout = QStackedLayout()
+        layout.addLayout(self._stackLayout)
+        centralWidget.setLayout(layout)
+        self.setCentralWidget(centralWidget)
 
-        label = QLabel(self.tr('Drop Files Here'), widget)
-        label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label)
+        def createLabel(text: str, parent: QWidget = centralWidget) -> QLabel:
+            label = QLabel(parent)
+            label.setText(text)
+            label.setAlignment(Qt.AlignCenter)
+            return label
 
-        return widget
+        def createPageWithProgressBar(text: str) -> QWidget:
+            page = QWidget(centralWidget)
+            pageLayout = QVBoxLayout()
+            page.setLayout(pageLayout)
+            label = QLabel(page)
+            label.setText(text)
+            label.setAlignment(Qt.AlignCenter)
+            progress = QProgressBar(page)
+            progress.setMinimum(0)
+            progress.setMaximum(0)
+
+            pageLayout.setSpacing(0)
+
+            pageLayout.addStretch()
+            pageLayout.addWidget(label)
+            pageLayout.addWidget(progress)
+            pageLayout.addStretch()
+
+            label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+            progress.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+
+            return page
+
+        self._stackLayout.addWidget(QWidget(centralWidget))
+        self._stackLayout.addWidget(createLabel(self.tr('Drag movies here')))
+        self._stackLayout.addWidget(createLabel(self.tr('Drop the files here')))
+        self._stackLayout.addWidget(createPageWithProgressBar(self.tr('Calculating hash...')))
+        self._stackLayout.addWidget(createPageWithProgressBar(self.tr('Searching for subtitles...')))
+        self._stackLayout.addWidget(createLabel(self.tr('Downloading subtitles...')))
+        self._stackLayout.addWidget(createLabel(self.tr('Launching movie')))
+
+        self.setCentralPage(MainWindow.CentralPage.DRAG_FILES)
+
+    @pyqtSlot(int)
+    def setCentralPage(self, page: CentralPage):
+        self._stackLayout.setCurrentIndex(page.value)
 
     @pyqtSlot()
     def showPreferences(self):
@@ -249,43 +286,59 @@ class MainWindow(QMainWindow):
 
         # TODO: Convert encoding
 
-    def _findSubtitles(self, hash, filePath):
-        logger.debug("hash={}, filePath={}".format(hash, filePath))
+    def _findSubtitles(self, hash: int, filePath: str):
+        logger.debug(f"hash={hash}, filePath={filePath}")
         if not self._token:
             logger.debug("Not authenticated, performing login()")
             self._token = self._subService.login()
             if not self._token:
                 # TODO: Define exception class
                 raise Exception("Unable to login")
-        logger.debug("_findSubtitles: token={}".format(self._token))
+        logger.debug(f"_findSubtitles: token={self._token}")
         return self._subService.find_by_hash(hash)
 
-    def _onHashCalculated(self, filePath, hash):
-        logger.debug("filePath={}, hash='{}'".format(filePath, hash))
+    def _onHashCalculated(self, filePath: str, hash: int, task: Task):
+        logger.debug(f"filePath={filePath}, hash={hash}, task={task}")
 
         self._schedule("Find Subtitles",
-                       partial(self._onSubtitlesFound, filePath),
-                       self._findSubtitles,
-                       hash,
-                       filePath)
+                       func=partial(self._findSubtitles, hash, filePath),
+                       onSuccess=partial(self._onSubtitlesFound, filePath),
+                       onError=self._errorHandler)
 
     def _saveToken(self, token):
         logger.debug("Got token:{}".format(token))
         self._token = token
 
-    def _schedule(self, name, onSuccess, func, *args, **kwargs):
-        worker = Worker(func, *args, **kwargs)
-        worker.on.success.connect(onSuccess)
-        worker.on.error.connect(worker.getErrorFunc(name))
-        self._threadPool.start(worker)
-        return worker
+    def _rescheduleTask(self, task) -> Task:
+        return self._schedule(task.name, task.func, task.onSuccess, task.onError)
+
+    def _schedule(self, name, func, onSuccess, onError=None) -> Task:
+        task = Task(func, name, onSuccess, onError)
+        self._scheduleTask(task)
+        return task
+
+    def _scheduleTask(self, task: Task) -> None:
+        logger.debug(f"ThreadPool starting task {task}")
+        self._threadPool.start(task)
+
+    def _errorHandler(self, e: Exception, task: Task):
+        mb = QMessageBox(self)
+        mb.setIcon(QMessageBox.Critical)
+        mb.setText(self.tr(f"Error occurred while running '{task.name}''"))
+        mb.setInformativeText(self.tr("Would you like to retry?"))
+        mb.setDetailedText(str(e) + '\n\n' + str(task))
+        mb.addButton(QMessageBox.Close)
+        mb.addButton(QMessageBox.Retry)
+        mb.setDefaultButton(QMessageBox.Retry)
+        # mb.setWindowModality(Qt.WindowModal)
+        response = mb.exec_()
+        if response == QMessageBox.Retry:
+            logger.info(f"Retrying task {task}")
+            self._rescheduleTask(task)
 
     def _processFile(self, filePath):
-        logger.debug(
-            "_processFile(): Running worker for filePath '{}'".format(
-                filePath
-            ))
+        logger.debug(f"_processFile(): Running worker for filePath '{filePath}'")
         self._schedule("Hash",
-                       partial(self._onHashCalculated, filePath),
-                       self._subService.calculate_hash,
-                       filePath)
+                       partial(self._subService.calculate_hash, filePath),
+                       onSuccess=partial(self._onHashCalculated, filePath),
+                       onError=self._errorHandler)
