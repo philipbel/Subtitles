@@ -98,7 +98,7 @@ class MainWindow(QMainWindow):
 
             quitAction = fileMenu.addAction(QUIT_ACTION)
 
-            helpMenu = mb.addMenu(self.tr("Help"))
+            helpMenu = mb.addMenu(self.tr("&Help"))
             aboutAction = helpMenu.addAction(ABOUT_ACTION)
 
         aboutAction.triggered.connect(self.showAbout)
