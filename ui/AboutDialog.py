@@ -20,6 +20,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QLayout,
     QPushButton,
+    QSpacerItem,
     QVBoxLayout,
     QWidget,
 )
@@ -54,7 +55,8 @@ class AboutDialog(QDialog):
         iconLabel.setPixmap(icon.pixmap(128))
         iconLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
-        appNameLabel = self._createSelectableLabel(app.applicationName())
+        appNameLabel = QLabel(self)
+        appNameLabel.setText(app.applicationName())
         appNameLabel.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         appNameLabel.setStyleSheet('font-weight: bold; font-size: 18pt')
         appNameLabel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
@@ -62,54 +64,46 @@ class AboutDialog(QDialog):
         version_labels = self._createVersionLabels()
 
         licenseLabel = self._createSelectableLabel(
-            '''Copyright © 2018–2019 Philip Belemezov
-            Licensed under the GNU General Public License, version 3 ''')
+            'Copyright © 2018–2019 Philip Belemezov<br>'
+            'Licensed under the <a href="about:blank">'
+            'GNU General Public License, version 3</a>.')
         licenseLabel.setStyleSheet('color: gray; font-size: 8pt')
         licenseLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+        licenseLabel.setTextFormat(Qt.RichText)
+        licenseLabel.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        licenseLabel.linkActivated.connect(self.showLicense)
 
         homepageLabel = self._createLinkLabel(
             text=self.tr("Homepage"),
             href="https://github.io/philipbel/subtitles")
+        homepageLabel.setAlignment(Qt.AlignCenter)
 
-        ackLabel = self._createLinkLabel(
-            text=self.tr("Acknowledgements"))
+        ackLabel = self._createLinkLabel(text=self.tr("Acknowledgements"))
+        ackLabel.setAlignment(Qt.AlignCenter)
         ackLabel.linkActivated.connect(self.showAcknowledgements)
 
-        licenseLinkLabel = self._createLinkLabel(text=self.tr("License"))
-        licenseLinkLabel.linkActivated.connect(self.showLicense)
-
-        linksLayout = QHBoxLayout()
+        linksLayout = QVBoxLayout()
         linksLayout.addWidget(homepageLabel)
+        linksLayout.addSpacing(5)
         linksLayout.addWidget(ackLabel)
-        linksLayout.addWidget(licenseLinkLabel)
 
-        leftLayout = QHBoxLayout()
-        leftLayout.setAlignment(Qt.AlignTop)
-        leftLayout.addWidget(iconLabel)
-
-        rightLayout = QVBoxLayout()
-        rightLayout.setSpacing(0)
-
-        rightLayout.addWidget(appNameLabel)
-
-        versionInfoLayout = QGridLayout()
-        versionInfoLayout.setHorizontalSpacing(5)
-        versionInfoLayout.setVerticalSpacing(0)
-        row = 0
+        versionInfoLayout = QFormLayout()
+        versionInfoLayout.setFormAlignment(Qt.AlignHCenter)
+        versionInfoLayout.setHorizontalSpacing(4)
         for name, value in version_labels:
             name.setText(name.text() + ':')
-            versionInfoLayout.addWidget(name, row, 0, Qt.AlignRight)
-            versionInfoLayout.addWidget(value, row, 1, Qt.AlignLeft)
-            row += 1
-        rightLayout.addLayout(versionInfoLayout)
+            versionInfoLayout.addRow(name, value)
 
-        centralLayout = QHBoxLayout()
-        centralLayout.addLayout(leftLayout)
-        centralLayout.addLayout(rightLayout)
 
         mainLayout = QVBoxLayout(self)
-        mainLayout.addLayout(centralLayout)
+        mainLayout.setSpacing(0)
+        mainLayout.addWidget(iconLabel)
+        mainLayout.addWidget(appNameLabel)
+        mainLayout.addSpacing(5)
+        mainLayout.addLayout(versionInfoLayout)
+        mainLayout.addSpacing(20)
         mainLayout.addLayout(linksLayout)
+        mainLayout.addSpacing(20)
         mainLayout.addWidget(licenseLabel)
 
         if sys.platform != 'darwin':
@@ -220,10 +214,12 @@ class AboutDialog(QDialog):
                 if not value:
                     continue
             versionLabel = QLabel(label_text)
+            versionLabel.setStyleSheet("font-size: 10pt")
             versionLabel.setSizePolicy(
                 QSizePolicy.Maximum, QSizePolicy.Maximum)
             versionValueLabel = self._createSelectableLabel(value)
             versionValueLabel.setSizePolicy(QSizePolicy.Maximum,
                                             QSizePolicy.Maximum)
+            versionValueLabel.setStyleSheet("font-size: 10pt")
             version_labels.append((versionLabel, versionValueLabel))
         return version_labels
