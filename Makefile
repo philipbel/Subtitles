@@ -119,6 +119,10 @@ $(ZIP_FILE_LINUX): $(ZIP_FILE)
 
 depends: depends-$(PLATFORM) pip-version Pipfile.lock
 
+depends-force:
+	touch Pipfile
+	$(MAKE) depends
+
 
 pip-version:
 	$(eval PIP_CUR_MAJOR_VERSION := $(shell $(PIPENV) run pip --version | cut -d' ' -f2 | cut -d. -f1))
