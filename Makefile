@@ -114,7 +114,7 @@ $(ZIP_FILE): $(DISTDIR)
 package-Linux: $(ZIP_FILE_LINUX)
 
 $(ZIP_FILE_LINUX): $(ZIP_FILE)
-	mv "$(ZIP_FILE)" "$(ZIP_FILE)"
+	mv "$(ZIP_FILE)" "$(ZIP_FILE_LINUX)"
 
 
 depends: depends-$(PLATFORM) pip-version Pipfile.lock
