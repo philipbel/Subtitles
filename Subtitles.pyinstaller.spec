@@ -60,61 +60,48 @@ a = Analysis(
     ],
     hookspath=[],
     runtime_hooks=[],
-    excludes=[
-        # 'PyQt5.QtBluetooth',
-        # 'PyQt5.QtWebEngineCore',
-        # 'PyQt5.QtWebEngine',
-        # 'PyQt5.QtWebEngineWidgets',
-        # 'PyQt5.QtLocation',
-        # 'PyQt5.QtWebChannel',
-        # 'PyQt5.QtQuick',
-        # 'PyQt5.QtQuickWidgets',
-        # 'PyQt5.QtSql',
-        # 'PyQt5.QtWebSockets',
-        # 'PyQt5.QtMultimedia',
-        # 'PyQt5.QtMultimediaWidgets',
-    ],
+    excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher)
 
-
+# Required modules
+# - DBus
+# - PrintSupport
+# - Qml
+# - Svg
+# - Test TODO: Only for testing
+# - EglFsKmsSupport?
 QT_MODULE_EXCLUDES = [
-    'QtBluetooth',
-    # 'QtDBus',  # Needed by libqcocoa.dylib
-    'QtDesigner',
-    'QtHelp',
-    'QtLocation',
-    'QtMultimedia',
-    'QtMultimediaWidgets',
-    'QtNetwork',
-    'QtNetworkAuth',
-    'QtNfc',
-    'QtPositioning',
-    'QtPositioningQuick',
-    # 'QtPrintSupport',  # Needed  by libqcocoa.dylib
-    'QtQml',
-    'QtQuick',
-    'QtQuickControls2',
-    'QtQuickParticles',
-    'QtQuickTemplates2',
-    'QtSensors',
-    'QtSerialPort',
-    'QtSql',
-    'QtSvg',
-    'QtTest',
-    'QtWebChannel',
-    'QtWebEngine',
-    'QtWebEngineCore',
-    'QtWebEngineWidgets',
-    'QtWebSockets',
-    'QtXmlPatterns'
+    'Bluetooth',
+    'Designer',
+    'Help',
+    'Location',
+    'Multimedia',
+    'MultimediaWidgets',
+    'Network',
+    'NetworkAuth',
+    'Nfc',
+    'Positioning',
+    'PositioningQuick',
+    'Quick',
+    'QuickControls2',
+    'QuickParticles',
+    'QuickTemplates2',
+    'Sensors',
+    'SerialPort',
+    'Sql',
+    'WebChannel',
+    'WebEngine',
+    'WebEngineCore',
+    'WebEngineWidgets',
+    'WebSockets',
+    'XmlPatterns'
 ]
 
 MODULE_EXCLUDES = []
 for x in QT_MODULE_EXCLUDES:
-    MODULE_EXCLUDES.append(x)
-    MODULE_EXCLUDES.append('PyQt5.' + x)
+    MODULE_EXCLUDES.extend([prefix + x for prefix in ['Qt', 'Qt5', 'PyQt5.']])
 
 new_binaries = []
 
@@ -122,44 +109,71 @@ for module, file, typ in a.binaries:
     should_exclude = False
     for qt_mod in MODULE_EXCLUDES:
         if qt_mod in module:
+            print(f"DEBUG: Excluding binary '{module}'")
             should_exclude = True
-    if 'PyQt5/Qt/qml/' in file \
-            or 'libqwebgl.dylib' in module \
-            or 'libqwebp.dylib' in module \
-            or 'libqtiff.dylib' in module \
-            or 'libqsvgicon.dylib' in module \
-            or module.startswith('PyQt5/Qt/plugins/sqldrivers') \
-            or module.startswith('PyQt5/Qt/plugins/mediaservice') \
-            or module.startswith('PyQt5/Qt/plugins/position') \
-            or module.startswith('PyQt5/Qt/plugins/sensors') \
-            or module.startswith('PyQt5/Qt/plugins/sensorgestures') \
-            or module.startswith('PyQt5/Qt/plugins/audio') \
-            or 'QtWebEngineCore.framework' in file:
+    if should_exclude:
+        continue
+    # On Linux, some paths are relative to the qml/ subdirectory, e.g. 
+    # .../lib/python3.7/site-packages/PyQt5/Qt/qml/Qt/labs/platform/../../../../lib/libQt5Widgets.so.5
+    # which causes essential Qt libraries to get excluded.
+    # So, normalize the path here, and then check for a match.
+    file = path.normpath(file)
+    if not module.startswith('libpython') and \
+        (
+            file.startswith('/usr/') or file.startswith('/lib')
+            or 'PyQt5/Qt/qml/' in file
+            or module.startswith('PyQt5/Qt/plugins/sqldrivers')
+            or module.startswith('PyQt5/Qt/plugins/mediaservice')
+            or module.startswith('PyQt5/Qt/plugins/position')
+            or module.startswith('PyQt5/Qt/plugins/sensors')
+            or module.startswith('PyQt5/Qt/plugins/sensorgestures')
+            or module.startswith('PyQt5/Qt/plugins/audio')
+            or 'PyQt5/Qt/plugins/imageformats/libqtga' in module
+            or 'PyQt5/Qt/plugins/imageformats/libqgif' in module
+            or 'PyQt5/Qt/plugins/imageformats/libqicns' in module
+            or 'PyQt5/Qt/plugins/imageformats/libqico' in module
+            or 'PyQt5/Qt/plugins/imageformats/libqwbmp' in module
+            or 'PyQt5/Qt/plugins/imageformats/libqwebp' in module
+            or 'PyQt5/Qt/plugins/imageformats/libqtiff' in module
+            or 'PyQt5/Qt/plugins/platforms/libqeglfs' in module
+            or 'PyQt5/Qt/plugins/platforms/libqlinuxfb' in module
+            or 'PyQt5/Qt/plugins/platforms/libqminimal' in module
+            or 'PyQt5/Qt/plugins/platforms/libqminimalegl' in module
+            or 'PyQt5/Qt/plugins/platforms/libqvnc' in module
+            or 'PyQt5/Qt/plugins/platforms/libqwebgl' in module
+            or 'PyQt5/Qt/plugins/platforms/libqoffscreen' in module
+            or 'PyQt5/Qt/plugins/playlistformats/libqtmultimedia_m3u' in module
+            or 'QtWebEngineCore.framework' in file
+           ):
+        print(f"Excluding binary '{module}'")
         should_exclude = True
     if should_exclude:
         continue
     new_binaries.append((module, file, typ))
 
 
-new_datas = []
-for module, file, typ in a.datas:
-    if module.startswith('PyQt5/Qt/qml/') \
-            or module.startswith('PyQt5/Qt/lib/QtWebEngineCore.framework') \
-            or module.startswith('PyQt5/Qt/translations'):
-        continue
-    new_datas.append((module, file, type))
+# new_datas = []
+# for module, file, typ in a.datas:
+#     if module.startswith('PyQt5/Qt/qml/') \
+#             or module.startswith('PyQt5/Qt/lib/QtWebEngineCore.framework') \
+#             or module.startswith('PyQt5/Qt/translations') \
+#             or 'qtwebengine_devtools_resources' in module  \
+#             or 'qtwebengine_resources' in module \
+#             or 'QtWebEngineProcess' in module:
+#         continue
+#     new_datas.append((module, file, type))
 
 
 a.binaries = TOC(initlist=new_binaries)
 a.datas = TOC(initlist=new_datas)
 
 
-# for attrib in ['scripts', 'pure', 'binaries', 'datas', 'zipfiles']:
-#     fn = attrib + '.txt'
-#     with open(fn, 'wb+') as fp:
-#         for m, f, t in getattr(a, attrib):
-#             fp.write("({}, {}, {})\n".format(m, f, t).encode('utf-8'))
-#     print('*** {} written to {}'.format(attrib, fn))
+for attrib in ['scripts', 'pure', 'binaries', 'datas', 'zipfiles']:
+    fn = attrib + '.txt'
+    with open(fn, 'wb+') as fp:
+        for m, f, t in getattr(a, attrib):
+            fp.write("({}, {}, {})\n".format(m, f, t).encode('utf-8'))
+    print('*** {} written to {}'.format(attrib, fn))
 
 
 pyz = PYZ(a.pure,
