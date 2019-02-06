@@ -109,7 +109,7 @@ for module, file, typ in a.binaries:
     should_exclude = False
     for qt_mod in MODULE_EXCLUDES:
         if qt_mod in module:
-            print(f"DEBUG: Excluding binary '{module}'")
+            # print(f"DEBUG: Excluding binary '{module}'")
             should_exclude = True
     if should_exclude:
         continue
@@ -145,35 +145,35 @@ for module, file, typ in a.binaries:
             or 'PyQt5/Qt/plugins/playlistformats/libqtmultimedia_m3u' in module
             or 'QtWebEngineCore.framework' in file
            ):
-        print(f"Excluding binary '{module}'")
+        # print(f"Excluding binary '{module}'")
         should_exclude = True
     if should_exclude:
         continue
     new_binaries.append((module, file, typ))
 
 
-# new_datas = []
-# for module, file, typ in a.datas:
-#     if module.startswith('PyQt5/Qt/qml/') \
-#             or module.startswith('PyQt5/Qt/lib/QtWebEngineCore.framework') \
-#             or module.startswith('PyQt5/Qt/translations') \
-#             or 'qtwebengine_devtools_resources' in module  \
-#             or 'qtwebengine_resources' in module \
-#             or 'QtWebEngineProcess' in module:
-#         continue
-#     new_datas.append((module, file, type))
+new_datas = []
+for module, file, typ in a.datas:
+    if module.startswith('PyQt5/Qt/qml/') \
+            or module.startswith('PyQt5/Qt/lib/QtWebEngineCore.framework') \
+            or module.startswith('PyQt5/Qt/translations') \
+            or 'qtwebengine_devtools_resources' in module  \
+            or 'qtwebengine_resources' in module \
+            or 'QtWebEngineProcess' in module:
+        continue
+    new_datas.append((module, file, type))
 
 
 a.binaries = TOC(initlist=new_binaries)
 a.datas = TOC(initlist=new_datas)
 
 
-for attrib in ['scripts', 'pure', 'binaries', 'datas', 'zipfiles']:
-    fn = attrib + '.txt'
-    with open(fn, 'wb+') as fp:
-        for m, f, t in getattr(a, attrib):
-            fp.write("({}, {}, {})\n".format(m, f, t).encode('utf-8'))
-    print('*** {} written to {}'.format(attrib, fn))
+# for attrib in ['scripts', 'pure', 'binaries', 'datas', 'zipfiles']:
+#     fn = attrib + '.txt'
+#     with open(fn, 'wb+') as fp:
+#         for m, f, t in getattr(a, attrib):
+#             fp.write("({}, {}, {})\n".format(m, f, t).encode('utf-8'))
+#     print('*** {} written to {}'.format(attrib, fn))
 
 
 pyz = PYZ(a.pure,
