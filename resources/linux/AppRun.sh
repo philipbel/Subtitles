@@ -18,10 +18,4 @@ export PATH="${HERE}/usr/lib/Subtitles:${PATH}"
 
 EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2 | cut -d " " -f 1)
 
-echo "${SELF}: pwd=${PWD}"
-echo "${SELF}: HERE=${HERE}"
-echo "${SELF}: EXEC=${EXEC}"
-echo "${SELF}: PATH=${PATH}"
-echo "${SELF}: binary=$(file /usr/lib/Subtitles/Subtitles)"
-
 exec "${EXEC}" "$@"
