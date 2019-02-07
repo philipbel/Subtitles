@@ -13,14 +13,6 @@ GIT_COMMIT := $(shell git log --pretty=format:'%h' -n 1)
 
 CREATE_DMG := node_modules/create-dmg/cli.js
 
-ifeq ($(APPIMAGETOOL),)
-	APPIMAGETOOL := appimagetool
-endif
-ifeq $(,$(shell which $(APPIMAGETOOL)))
-	$(error "You must have appimagetool in your PATH or set the APPIMAGETOOL " \
-		"environment variable")
-endif
-
 NAME := Subtitles
 NAME_VERSION = $(NAME)-$(VERSION)
 DMG_FILE = $(DISTDIR)/$(NAME_VERSION).dmg
@@ -45,6 +37,15 @@ ifneq (,$(findstring MINGW, $(PLATFORM)))
 else
 	ifneq (,$(findstring MSYS_NT, $(PLATFORM)))
 		PLATFORM := Windows
+	endif
+endif
+
+ifeq $($(PLATFORM),Linux)
+	ifeq ($(APPIMAGETOOL),)
+		APPIMAGETOOL := appimagetool
+	endif
+	ifeq $(,$(shell which $(APPIMAGETOOL)))
+		$(error "You must have appimagetool in your PATH or set the APPIMAGETOOL environment variable")
 	endif
 endif
 
