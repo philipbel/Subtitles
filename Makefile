@@ -13,6 +13,14 @@ GIT_COMMIT := $(shell git log --pretty=format:'%h' -n 1)
 
 CREATE_DMG := node_modules/create-dmg/cli.js
 
+ifeq ($(APPIMAGETOOL),)
+	APPIMAGETOOL := appimagetool
+endif
+ifeq $(,$(shell which $(APPIMAGETOOL)))
+	$(error "You must have appimagetool in your PATH or set the APPIMAGETOOL " \
+		"environment variable")
+endif
+
 NAME := Subtitles
 NAME_VERSION = $(NAME)-$(VERSION)
 DMG_FILE = $(DISTDIR)/$(NAME_VERSION).dmg
@@ -85,7 +93,7 @@ $(BUILD_TIMESTAMP):
 	fi
 
 	echo "$(shell uname -n -r -m -o)" > doc/VERSION.build_host
-	
+
 	if [ -n "${TRAVIS_BUILD_NUMBER}" ]; then \
 		echo "${TRAVIS_BUILD_NUMBER}" > doc/VERSION.build_number; \
 	fi
@@ -130,7 +138,7 @@ $(ZIP_FILE_LINUX): $(ZIP_FILE)
 	mv "$(ZIP_FILE)" "$(ZIP_FILE_LINUX)"
 
 $(APPIMAGE): $(APPDIR)-dir $(APPDIR)
-	appimagetool $(APPDIR) $(APPIMAGE)
+	$(APPIMAGETOOL) $(APPDIR) $(APPIMAGE)
 
 $(APPDIR)-dir:
 	$(RM) -r $(APPDIR)

@@ -22,6 +22,11 @@ matrix:
       before_install:
         - sudo pip install --upgrade pipenv
         - curl -s https://packagecloud.io/install/repositories/packpack/packpack/script.deb.sh | sudo bash
+        - |
+          cd /tmp
+          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          export APPIMAGETOOL=/tmp/appimagetool-x86_64.AppImage
+          chmod +x $APPIMAGETOOL
       # script:
     - os: osx
       language: generic
