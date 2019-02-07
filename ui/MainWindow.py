@@ -52,6 +52,7 @@ from PyQt5.QtWidgets import (
 from .task import Task
 from .PreferencesDialog import PreferencesDialog
 from .AboutDialog import AboutDialog
+from .DragAnimationWidget import DragAnimationWidget
 # from pprint import pformat
 from service.OpenSubService import OpenSubService
 from service.EncodingService import EncodingService
@@ -82,8 +83,11 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle(self.tr(PROG))
         self.setUnifiedTitleAndToolBarOnMac(True)
-        self.resize(320, 240)
+        self.resize(320, 240)  # TODO: Make proportional to the screen size.
         self.setAcceptDrops(True)
+
+        self._dragAnimWidget = DragAnimationWidget()
+        self._dragAnimWidget.setLayout(QHBoxLayout())
 
     def _initMenu(self):
         # mb = self.menuBar()
@@ -174,66 +178,12 @@ class MainWindow(QMainWindow):
         dlg = AboutDialog(self)
         dlg.exec_()
 
-    @unique
-    class CentralPage(IntEnum):
-        HIDDEN = 0
-        DRAG_FILES = auto()
-        DROP_FILES = auto()
-        HASHING = auto()
-        SEARCHING = auto()
-        DOWNLOADING = auto()
-        LAUNCHING = auto()
-
     def _initCentralWidget(self):
         centralWidget = QWidget(self)
         layout = QVBoxLayout()
-        self._stackLayout = QStackedLayout()
-        layout.addLayout(self._stackLayout)
+        layout.setContentsMargins(0, 0, 0, 0)
         centralWidget.setLayout(layout)
         self.setCentralWidget(centralWidget)
-
-        def createLabel(text: str, parent: QWidget = centralWidget) -> QLabel:
-            label = QLabel(parent)
-            label.setText(text)
-            label.setAlignment(Qt.AlignCenter)
-            return label
-
-        def createPageWithProgressBar(text: str) -> QWidget:
-            page = QWidget(centralWidget)
-            pageLayout = QVBoxLayout()
-            page.setLayout(pageLayout)
-            label = QLabel(page)
-            label.setText(text)
-            label.setAlignment(Qt.AlignCenter)
-            progress = QProgressBar(page)
-            progress.setMinimum(0)
-            progress.setMaximum(0)
-
-            pageLayout.setSpacing(0)
-
-            pageLayout.addStretch()
-            pageLayout.addWidget(label)
-            pageLayout.addWidget(progress)
-            pageLayout.addStretch()
-
-            label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-            progress.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-
-            return page
-
-        self._stackLayout.addWidget(QWidget(centralWidget))
-        self._stackLayout.addWidget(createLabel(self.tr('Drag movies here')))
-        self._stackLayout.addWidget(createLabel(self.tr('Drop the files here')))
-        self._stackLayout.addWidget(createPageWithProgressBar(self.tr('Calculating hash...')))
-        self._stackLayout.addWidget(createPageWithProgressBar(self.tr('Searching for subtitles...')))
-        self._stackLayout.addWidget(createLabel(self.tr('Downloading subtitles...')))
-        self._stackLayout.addWidget(createLabel(self.tr('Launching movie')))
-
-        self.setCentralPage(MainWindow.CentralPage.DRAG_FILES)
-
-    @pyqtSlot(int)
-    def setCentralPage(self, page: CentralPage):
-        self._stackLayout.setCurrentIndex(page.value)
 
     @pyqtSlot()
     def showPreferences(self):
@@ -246,6 +196,11 @@ class MainWindow(QMainWindow):
 
     def dragEnterEvent(self, e):
         logger.debug("mime: {}".format(e.mimeData().formats()))
+
+        self.centralWidget().layout().addWidget(self._dragAnimWidget)
+        self._dragAnimWidget.show()
+        self._dragAnimWidget.startAnimation()
+
         if not e.mimeData().hasUrls():
             # e.ignore()
             return
@@ -259,6 +214,11 @@ class MainWindow(QMainWindow):
         e.acceptProposedAction()
 
     def dragLeaveEvent(self, e):
+        logger.debug("")
+
+        self._dragAnimWidget.stopAnimation()
+        self.centralWidget().layout().removeWidget(self._dragAnimWidget)
+        self._dragAnimWidget.hide()
         e.accept()
 
     def dropEvent(self, e):
