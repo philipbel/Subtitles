@@ -101,3 +101,8 @@ doc/VERSION.commit
 # npm
 node_modules/
 package-lock.json
+
+
+doc/VERSION.build_host
+doc/VERSION.commit
+doc/VERSION.build_number
