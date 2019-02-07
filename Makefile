@@ -19,7 +19,6 @@ DMG_FILE = $(DISTDIR)/$(NAME_VERSION).dmg
 DMG_SRCDIR = $(DISTDIR)/dmg_dir
 # DMG_TEMP := $(shell mktemp)
 APP_BUNDLE = $(DISTDIR)/Subtitles.app
-
 EXE := $(DISTDIR)/Subtitles/Subtitles.exe
 ZIP_FILE := $(DISTDIR)/$(NAME_VERSION).zip
 ZIP_FILE_WINDOWS := $(DISTDIR)/$(NAME_VERSION)-Windows.zip
@@ -72,37 +71,45 @@ diag:
 	@echo "PIP_INSTALL=$(PIP_INSTALL)"
 
 
-build:
-	@if [ -n "$(TRAVIS_COMMIT)" ]; then \
-		echo "$(TRAVIS_COMMIT)" > doc/VERSION.commit; \
+
+build: $(BUILD_TIMESTAMP)
+
+$(BUILD_TIMESTAMP):
+	if [ -n "${TRAVIS_COMMIT}" ]; then \
+		GIT_COMMIT="${TRAVIS_COMMIT}"; \
+	else \
+		GIT_COMMIT="$(shell git log --pretty=format:'%h' -n 1)"; \
+	fi; \
+	if [ -n "$(GIT_COMMIT)" ]; then	\
+		echo "$(GIT_COMMIT)" > doc/VERSION.commit; \
 	fi
-	@if [ -n "${TRAVIS_APP_HOST}" ]; then \
-		echo "${TRAVIS_APP_HOST}" > doc/VERSION.build_host; \
-	fi
-	@if [ -n "${TRAVIS_BUILD_NUMBER}" ]; then \
+
+	echo "$(shell uname -n -r -m -o)" > doc/VERSION.build_host
+	
+	if [ -n "${TRAVIS_BUILD_NUMBER}" ]; then \
 		echo "${TRAVIS_BUILD_NUMBER}" > doc/VERSION.build_number; \
 	fi
+
 	$(PIPENV) run pyinstaller -y Subtitles.pyinstaller.spec
+	touch $(BUILD_TIMESTAMP)
 
 
-package: build package-$(PLATFORM)
+package: package-$(PLATFORM)
 
 
 
 package-Darwin: $(DMG_FILE)
 
-$(DMG_FILE):
+$(DMG_FILE): $(BUILD_TIMESTAMP)
 	@if $(CREATE_DMG) --overwrite "$(APP_BUNDLE)" "$(DISTDIR)" \
 		| grep 'No usable identity found'; then \
 		if [ ! -f "$(DISTDIR)/$(NAME) $(VERSION).dmg" ]; then \
-			echo "Code signing failed (normal), but DMG not created."; \
+			@echo "Code signing failed (normal), but DMG not created."; \
 			exit 1; \
 		fi ; \
-		echo "Warning: Unable to code sign DMG"; \
+		@echo "Warning: Unable to code sign DMG"; \
 	fi
 	mv "$(DISTDIR)/$(NAME) $(VERSION).dmg" "$(DISTDIR)/$(NAME_VERSION).dmg"
-
-
 
 
 package-Windows: $(ZIP_FILE_WINDOWS)
@@ -111,13 +118,13 @@ $(ZIP_FILE_WINDOWS): $(ZIP_FILE)
 	mv "$(ZIP_FILE)" "$(ZIP_FILE_WINDOWS)"
 
 
-$(ZIP_FILE): $(DISTDIR)
-	$(RM) $(ZIP_FILE)
-	cd $(DISTDIR) && zip -dd -9 -o -r $(NAME_VERSION).zip Subtitles >/dev/null
+$(ZIP_FILE): $(BUILD_TIMESTAMP)
+	# $(RM) $(ZIP_FILE)
+	cd $(DISTDIR) && zip -dd -9 -o -r $(NAME_VERSION).zip $(NAME) >/dev/null
 	@echo "ZIP File $(ZIP_FILE) created."
 
 
-package-Linux: $(ZIP_FILE_LINUX)
+package-Linux: $(ZIP_FILE_LINUX) $(APPIMAGE)
 
 $(ZIP_FILE_LINUX): $(ZIP_FILE)
 	mv "$(ZIP_FILE)" "$(ZIP_FILE_LINUX)"
@@ -172,8 +179,6 @@ depends-Linux:
 
 depends-Darwin:
 
-
-# release: package
 
 
 clean:
