@@ -14,7 +14,7 @@ class Application(QApplication):
 
     _resourceMap = {
         ResourceType.IMAGE: {
-            'extensions': ['.svg', '.png'],
+            'extensions': ['.png'],
         }
     }
 
@@ -32,12 +32,16 @@ class Application(QApplication):
 
     def _initResourcePaths(self):
         resourcePaths = []
+        resourcePaths.append(path.dirname(__file__))
+
         resourcePaths.extend(QStandardPaths.standardLocations(
             QStandardPaths.AppLocalDataLocation))
+
         # For when we're running from the dev tree
         resourcePaths.append(path.abspath(path.curdir))
         resourcePaths.append(path.join(path.abspath(path.curdir), 'resources'))
         resourcePaths.append(path.join(path.abspath(path.curdir), 'doc'))
+
         return resourcePaths
 
     def findResource(self, resource, resourceType=None):
