@@ -5,11 +5,11 @@ name = "pypi"
 
 [packages]
 injector = "*"
-"pyqt5" = "*"
 python-opensubtitles = {git = "https://github.com/agonzalezro/python-opensubtitles.git"}
 requests = "*"
 pyinstaller = "*"
 pywin32-ctypes = {version = "*",sys_platform = "== 'win32'"}
+pyside2 = "*"
 
 [dev-packages]
 "autopep8" = "*"

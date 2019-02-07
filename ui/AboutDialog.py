@@ -1,28 +1,46 @@
+# Copyright (C) 2018--2019 Philip Belemezov.
+# All Rights Reserved.
+#
+# This file is part of Subtitles.
+#
+# Subtitles is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Subtitles is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Subtitles.  If not, see <https://www.gnu.org/licenses/>.
+
 import re
 import sys
 from typing import List, Tuple
-from PyQt5.Qt import (
-    PYQT_VERSION_STR,
-    pyqtSlot,
-    # QDesktopServices,
-    QFrame,
-    QIcon,
-    QSizePolicy,
+import PySide2
+from PySide2.QtCore import (
+    Slot,
     Qt,
-    # QUrl,
 )
-from PyQt5.QtWidgets import (
+from PySide2.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QFormLayout,
+    QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QLayout,
     QPushButton,
+    QSizePolicy,
     QSpacerItem,
     QVBoxLayout,
     QWidget,
+)
+from PySide2.QtGui import (
+    QIcon,
 )
 from Application import Application
 from .TextDialog import TextDialog
@@ -142,7 +160,7 @@ class AboutDialog(QDialog):
             Qt.TextSelectableByKeyboard | Qt.TextSelectableByMouse)
         return label
 
-    @pyqtSlot()
+    @Slot()
     def showAcknowledgements(self):
         app = Application.instance()
         ackFilename = app.findResource('ACKNOWLEDGEMENTS.html')
@@ -154,7 +172,7 @@ class AboutDialog(QDialog):
                                 html_filename=ackFilename)
         textDialog.exec_()
 
-    @pyqtSlot()
+    @Slot()
     def showLicense(self):
         app = Application.instance()
         licenseFilename = app.findResource('LICENSE.html')
@@ -187,8 +205,8 @@ class AboutDialog(QDialog):
     _VERSION_LABELS = [
         {'label': Application.translate(
             'AboutDialog', 'Version'), 'file': 'VERSION'},
-        {'label': Application.translate('AboutDialog', 'PyQt Version'),
-         'value': PYQT_VERSION_STR},
+        {'label': Application.translate('AboutDialog', 'PySide2 Version'),
+         'value': PySide2.__version__},
         {'label': Application.translate('AboutDialog', 'Git Commit'),
          'file': 'VERSION.commit'},
         {'label': Application.translate('AboutDialog', 'Build Number'),

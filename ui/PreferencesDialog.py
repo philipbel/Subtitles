@@ -1,15 +1,32 @@
+# Copyright (C) 2018--2019 Philip Belemezov.
+# All Rights Reserved.
+#
+# This file is part of Subtitles.
+#
+# Subtitles is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Subtitles is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Subtitles.  If not, see <https://www.gnu.org/licenses/>.
+
 import sys
 from os import path
-from PyQt5.Qt import (
-    QApplication,
-    QIcon,
+from PySide2.QtCore import (
     QLocale,
     QMimeData,
     Qt,
     QTextCodec,
 )
-from PyQt5.QtWidgets import (
+from PySide2.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QComboBox,
     QCheckBox,
     QDialog,
@@ -23,6 +40,9 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QPushButton,
     QVBoxLayout
+)
+from PySide2.QtGui import (
+    QIcon,
 )
 from .Settings import Settings
 from Application import Application
@@ -114,7 +134,7 @@ class PreferencesDialog(QDialog):
         encList = QComboBox(self)
 
         codecs = QTextCodec.availableCodecs()
-        codecNames = sorted([str(x, encoding='ascii')
+        codecNames = sorted([str(x.data(), encoding='ascii')
                              for x in codecs], key=lambda x: x.lower())
 
         for codec in codecNames:
@@ -160,7 +180,7 @@ class PreferencesDialog(QDialog):
         enc = settings.get(Settings.ENCODING)
         if enc:
             return enc
-        return str(QTextCodec.codecForLocale().name(), encoding='ascii')
+        return str(QTextCodec.codecForLocale().name().data(), encoding='ascii')
 
     def _getPreferredLanguages(self):
         settings = Settings()

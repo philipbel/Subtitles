@@ -1,4 +1,20 @@
-# -*- mode: python -*-
+# Copyright (C) 2018--2019 Philip Belemezov.
+# All Rights Reserved.
+#
+# This file is part of Subtitles.
+#
+# Subtitles is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Subtitles is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Subtitles.  If not, see <https://www.gnu.org/licenses/>.
 
 from PyInstaller.utils.hooks import collect_dynamic_libs
 from PyInstaller.building.datastruct import TOC
@@ -32,7 +48,7 @@ def write_subst_file(in_filename, out_filename, subst_dict):
 # From https://github.com/spesmilo/electrum/blob/master/contrib/build-osx/osx.spec
 # Workaround for "Retro Look":
 binaries = []
-for b in collect_dynamic_libs('PyQt5'):
+for b in collect_dynamic_libs('PySide'):
     if re.match(r'.*style\..*', b[0]):
         print('*** Adding Qt5 Style {}'.format(b[0]))
         binaries.append(b)
@@ -40,7 +56,7 @@ for b in collect_dynamic_libs('PyQt5'):
 data_files = [
     ('doc/VERSION', RESOURCES_DIR),
     ('doc/ACKNOWLEDGEMENTS.html', RESOURCES_DIR),
-    # ('doc/LICENSE.PyQt5', RESOURCES_DIR),
+    # ('doc/LICENSE.PySide', RESOURCES_DIR),
     ('doc/LICENSE.html',  RESOURCES_DIR),
     ('resources/Subtitles.png', RESOURCES_DIR),
 ]
@@ -101,7 +117,7 @@ QT_MODULE_EXCLUDES = [
 
 MODULE_EXCLUDES = []
 for x in QT_MODULE_EXCLUDES:
-    MODULE_EXCLUDES.extend([prefix + x for prefix in ['Qt', 'Qt5', 'PyQt5.']])
+    MODULE_EXCLUDES.extend([prefix + x for prefix in ['Qt', 'Qt5', 'PySide.']])
 
 new_binaries = []
 
@@ -114,35 +130,35 @@ for module, file, typ in a.binaries:
     if should_exclude:
         continue
     # On Linux, some paths are relative to the qml/ subdirectory, e.g. 
-    # .../lib/python3.7/site-packages/PyQt5/Qt/qml/Qt/labs/platform/../../../../lib/libQt5Widgets.so.5
+    # .../lib/python3.7/site-packages/PySide/Qt/qml/Qt/labs/platform/../../../../lib/libQt5Widgets.so.5
     # which causes essential Qt libraries to get excluded.
     # So, normalize the path here, and then check for a match.
     file = path.normpath(file)
     if not module.startswith('libpython') and \
         (
             file.startswith('/usr/') or file.startswith('/lib')
-            or 'PyQt5/Qt/qml/' in file
-            or module.startswith('PyQt5/Qt/plugins/sqldrivers')
-            or module.startswith('PyQt5/Qt/plugins/mediaservice')
-            or module.startswith('PyQt5/Qt/plugins/position')
-            or module.startswith('PyQt5/Qt/plugins/sensors')
-            or module.startswith('PyQt5/Qt/plugins/sensorgestures')
-            or module.startswith('PyQt5/Qt/plugins/audio')
-            or 'PyQt5/Qt/plugins/imageformats/libqtga' in module
-            or 'PyQt5/Qt/plugins/imageformats/libqgif' in module
-            or 'PyQt5/Qt/plugins/imageformats/libqicns' in module
-            or 'PyQt5/Qt/plugins/imageformats/libqico' in module
-            or 'PyQt5/Qt/plugins/imageformats/libqwbmp' in module
-            or 'PyQt5/Qt/plugins/imageformats/libqwebp' in module
-            or 'PyQt5/Qt/plugins/imageformats/libqtiff' in module
-            or 'PyQt5/Qt/plugins/platforms/libqeglfs' in module
-            or 'PyQt5/Qt/plugins/platforms/libqlinuxfb' in module
-            or 'PyQt5/Qt/plugins/platforms/libqminimal' in module
-            or 'PyQt5/Qt/plugins/platforms/libqminimalegl' in module
-            or 'PyQt5/Qt/plugins/platforms/libqvnc' in module
-            or 'PyQt5/Qt/plugins/platforms/libqwebgl' in module
-            or 'PyQt5/Qt/plugins/platforms/libqoffscreen' in module
-            or 'PyQt5/Qt/plugins/playlistformats/libqtmultimedia_m3u' in module
+            or 'PySide/Qt/qml/' in file
+            or module.startswith('PySide/Qt/plugins/sqldrivers')
+            or module.startswith('PySide/Qt/plugins/mediaservice')
+            or module.startswith('PySide/Qt/plugins/position')
+            or module.startswith('PySide/Qt/plugins/sensors')
+            or module.startswith('PySide/Qt/plugins/sensorgestures')
+            or module.startswith('PySide/Qt/plugins/audio')
+            or 'PySide/Qt/plugins/imageformats/libqtga' in module
+            or 'PySide/Qt/plugins/imageformats/libqgif' in module
+            or 'PySide/Qt/plugins/imageformats/libqicns' in module
+            or 'PySide/Qt/plugins/imageformats/libqico' in module
+            or 'PySide/Qt/plugins/imageformats/libqwbmp' in module
+            or 'PySide/Qt/plugins/imageformats/libqwebp' in module
+            or 'PySide/Qt/plugins/imageformats/libqtiff' in module
+            or 'PySide/Qt/plugins/platforms/libqeglfs' in module
+            or 'PySide/Qt/plugins/platforms/libqlinuxfb' in module
+            or 'PySide/Qt/plugins/platforms/libqminimal' in module
+            or 'PySide/Qt/plugins/platforms/libqminimalegl' in module
+            or 'PySide/Qt/plugins/platforms/libqvnc' in module
+            or 'PySide/Qt/plugins/platforms/libqwebgl' in module
+            or 'PySide/Qt/plugins/platforms/libqoffscreen' in module
+            or 'PySide/Qt/plugins/playlistformats/libqtmultimedia_m3u' in module
             or 'QtWebEngineCore.framework' in file
            ):
         # print(f"Excluding binary '{module}'")
@@ -154,9 +170,9 @@ for module, file, typ in a.binaries:
 
 new_datas = []
 for module, file, typ in a.datas:
-    if module.startswith('PyQt5/Qt/qml/') \
-            or module.startswith('PyQt5/Qt/lib/QtWebEngineCore.framework') \
-            or module.startswith('PyQt5/Qt/translations') \
+    if module.startswith('PySide/Qt/qml/') \
+            or module.startswith('PySide/Qt/lib/QtWebEngineCore.framework') \
+            or module.startswith('PySide/Qt/translations') \
             or 'qtwebengine_devtools_resources' in module  \
             or 'qtwebengine_resources' in module \
             or 'QtWebEngineProcess' in module:

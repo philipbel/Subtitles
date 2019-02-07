@@ -1,3 +1,21 @@
+# Copyright (C) 2018--2019 Philip Belemezov.
+# All Rights Reserved.
+#
+# This file is part of Subtitles.
+#
+# Subtitles is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Subtitles is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Subtitles.  If not, see <https://www.gnu.org/licenses/>.
+
 import shutil
 import os
 import gzip
@@ -5,41 +23,39 @@ import sys
 import requests
 from enum import IntEnum, auto, unique
 from os import path
-from PyQt5.Qt import (
-    pyqtSlot,
+from PySide2.QtCore import (
+    QMimeDatabase,
+    QMimeType,
+    Qt,
+    QThreadPool,
+    Slot
+)
+from PySide2.QtWidgets import (
     QAction,
     QApplication,
     QErrorMessage,
-    QKeySequence,
-    QMainWindow,
-    QMenu,
-    QMimeDatabase,
-    QMimeType,
-    QSizePolicy,
-    Qt,
-    QThreadPool,
-)
-from PyQt5.QtWidgets import (
     QFileDialog,
     QLabel,
+    QMainWindow,
+    QMenu,
     QMenuBar,
     QMessageBox,
     QProgressBar,
+    QSizePolicy,
     QStackedLayout,
     QHBoxLayout,
     QVBoxLayout,
     QWidget,
 )
-# from PyQt5.QtSvg import QSvgWidget
+from PySide2.QtGui import (
+    QKeySequence,
+)
 from .task import Task
 from .PreferencesDialog import PreferencesDialog
 from .AboutDialog import AboutDialog
-# from pprint import pformat
 from service.OpenSubService import OpenSubService
 from service.EncodingService import EncodingService
 from log import logger
-# import multiprocessing
-# import rx
 from functools import partial
 from tempfile import NamedTemporaryFile
 
@@ -113,7 +129,7 @@ class MainWindow(QMainWindow):
 
         self.setMenuBar(mb)
 
-    @pyqtSlot()
+    @Slot()
     def showOpenFile(self):
         dlg = QFileDialog(self)
         dlg.setWindowTitle(self.tr("Open Video Files"))
@@ -151,7 +167,7 @@ class MainWindow(QMainWindow):
             for f in filenames:
                 self._processFile(f)
 
-    @pyqtSlot()
+    @Slot()
     def showAbout(self):
         dlg = AboutDialog(self)
         dlg.exec_()
@@ -213,11 +229,11 @@ class MainWindow(QMainWindow):
 
         self.setCentralPage(MainWindow.CentralPage.DRAG_FILES)
 
-    @pyqtSlot(int)
+    @Slot(int)
     def setCentralPage(self, page: CentralPage):
         self._stackLayout.setCurrentIndex(page.value)
 
-    @pyqtSlot()
+    @Slot()
     def showPreferences(self):
         prefDialog = PreferencesDialog(
             subtitleService=self._subService,
