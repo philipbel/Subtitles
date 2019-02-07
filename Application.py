@@ -19,8 +19,11 @@
 import sys
 from os import path
 from enum import Enum
-from PyQt5.Qt import (
-    QApplication, QStandardPaths, QSettings
+from PySide2.QtCore import (
+    QStandardPaths, QSettings
+)
+from PySide2.QtWidgets import (
+    QApplication
 )
 from log import logger
 

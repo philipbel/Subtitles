@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Subtitles.  If not, see <https://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QSettings
+from PySide2.QtCore import QSettings
 from log import logger
 from os import path
 

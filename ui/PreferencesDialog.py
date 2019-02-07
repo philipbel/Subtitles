@@ -18,16 +18,15 @@
 
 import sys
 from os import path
-from PyQt5.Qt import (
-    QApplication,
-    QIcon,
+from PySide2.QtCore import (
     QLocale,
     QMimeData,
     Qt,
     QTextCodec,
 )
-from PyQt5.QtWidgets import (
+from PySide2.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QComboBox,
     QCheckBox,
     QDialog,
@@ -41,6 +40,9 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QPushButton,
     QVBoxLayout
+)
+from PySide2.QtGui import (
+    QIcon,
 )
 from .Settings import Settings
 from Application import Application
@@ -132,7 +134,7 @@ class PreferencesDialog(QDialog):
         encList = QComboBox(self)
 
         codecs = QTextCodec.availableCodecs()
-        codecNames = sorted([str(x, encoding='ascii')
+        codecNames = sorted([str(x.data(), encoding='ascii')
                              for x in codecs], key=lambda x: x.lower())
 
         for codec in codecNames:
@@ -178,7 +180,7 @@ class PreferencesDialog(QDialog):
         enc = settings.get(Settings.ENCODING)
         if enc:
             return enc
-        return str(QTextCodec.codecForLocale().name(), encoding='ascii')
+        return str(QTextCodec.codecForLocale().name().data(), encoding='ascii')
 
     def _getPreferredLanguages(self):
         settings = Settings()

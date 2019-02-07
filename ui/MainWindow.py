@@ -23,41 +23,39 @@ import sys
 import requests
 from enum import IntEnum, auto, unique
 from os import path
-from PyQt5.Qt import (
-    pyqtSlot,
+from PySide2.QtCore import (
+    QMimeDatabase,
+    QMimeType,
+    Qt,
+    QThreadPool,
+    Slot
+)
+from PySide2.QtWidgets import (
     QAction,
     QApplication,
     QErrorMessage,
-    QKeySequence,
-    QMainWindow,
-    QMenu,
-    QMimeDatabase,
-    QMimeType,
-    QSizePolicy,
-    Qt,
-    QThreadPool,
-)
-from PyQt5.QtWidgets import (
     QFileDialog,
     QLabel,
+    QMainWindow,
+    QMenu,
     QMenuBar,
     QMessageBox,
     QProgressBar,
+    QSizePolicy,
     QStackedLayout,
     QHBoxLayout,
     QVBoxLayout,
     QWidget,
 )
-# from PyQt5.QtSvg import QSvgWidget
+from PySide2.QtGui import (
+    QKeySequence,
+)
 from .task import Task
 from .PreferencesDialog import PreferencesDialog
 from .AboutDialog import AboutDialog
-# from pprint import pformat
 from service.OpenSubService import OpenSubService
 from service.EncodingService import EncodingService
 from log import logger
-# import multiprocessing
-# import rx
 from functools import partial
 from tempfile import NamedTemporaryFile
 
@@ -131,7 +129,7 @@ class MainWindow(QMainWindow):
 
         self.setMenuBar(mb)
 
-    @pyqtSlot()
+    @Slot()
     def showOpenFile(self):
         dlg = QFileDialog(self)
         dlg.setWindowTitle(self.tr("Open Video Files"))
@@ -169,7 +167,7 @@ class MainWindow(QMainWindow):
             for f in filenames:
                 self._processFile(f)
 
-    @pyqtSlot()
+    @Slot()
     def showAbout(self):
         dlg = AboutDialog(self)
         dlg.exec_()
@@ -231,11 +229,11 @@ class MainWindow(QMainWindow):
 
         self.setCentralPage(MainWindow.CentralPage.DRAG_FILES)
 
-    @pyqtSlot(int)
+    @Slot(int)
     def setCentralPage(self, page: CentralPage):
         self._stackLayout.setCurrentIndex(page.value)
 
-    @pyqtSlot()
+    @Slot()
     def showPreferences(self):
         prefDialog = PreferencesDialog(
             subtitleService=self._subService,

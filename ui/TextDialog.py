@@ -17,12 +17,14 @@
 # along with Subtitles.  If not, see <https://www.gnu.org/licenses/>.
 
 import sys
-from PyQt5.Qt import (
-    Qt,
-    QFontMetrics,
+from PySide2.QtCore import (
     QRect,
+    Qt,
 )
-from PyQt5.QtWidgets import (
+from PySide2.QtGui import (
+    QFontMetrics,
+)
+from PySide2.QtWidgets import (
     qApp,
     QDesktopWidget,
     QDialog,

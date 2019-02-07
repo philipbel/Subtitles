@@ -21,9 +21,9 @@
 import sys
 import signal
 import log
-from PyQt5.Qt import PYQT_VERSION_STR
-from PyQt5.Qt import QSettings
-from PyQt5.QtWidgets import QDesktopWidget
+import PySide2
+from PySide2.QtCore import QSettings
+from PySide2.QtWidgets import QDesktopWidget
 from log import logger
 from Application import Application
 from ui.MainWindow import MainWindow
@@ -35,7 +35,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 if __name__ == "__main__":
     log.init()
 
-    logger.info("Using PyQt5 version {}".format(PYQT_VERSION_STR))
+    logger.info("Using PySide2 version {}".format(PySide2.__version__))
 
     # Use INI files on Windows, NativeFormat on all other OS
     if sys.platform == 'win32':
