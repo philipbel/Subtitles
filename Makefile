@@ -40,11 +40,11 @@ else
 	endif
 endif
 
-ifeq $($(PLATFORM),Linux)
+ifeq ($(PLATFORM),Linux)
 	ifeq ($(APPIMAGETOOL),)
 		APPIMAGETOOL := appimagetool
 	endif
-	ifeq $(,$(shell which $(APPIMAGETOOL)))
+	ifeq (,$(shell which $(APPIMAGETOOL)))
 		$(error "You must have appimagetool in your PATH or set the APPIMAGETOOL environment variable")
 	endif
 endif
