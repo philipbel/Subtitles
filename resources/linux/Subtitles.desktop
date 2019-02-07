@@ -1,0 +1,17 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+
+Name=Subtitles
+Comment=Download movie subtitles
+
+# The path to the folder in which the executable is run
+# Path=
+
+Exec=Subtitles
+
+Icon=Subtitles
+
+Terminal=false
+
+Categories=Video;AudioVideo;

@@ -24,7 +24,13 @@ EXE := $(DISTDIR)/Subtitles/Subtitles.exe
 ZIP_FILE := $(DISTDIR)/$(NAME_VERSION).zip
 ZIP_FILE_WINDOWS := $(DISTDIR)/$(NAME_VERSION)-Windows.zip
 ZIP_FILE_LINUX := $(DISTDIR)/$(NAME_VERSION)-Linux.zip
-
+APPDIR := $(DISTDIR)/$(NAME_VERSION).AppDir
+APPIMAGE := $(DISTDIR)/$(NAME_VERSION).AppImage
+BUILD_TIMESTAMP := $(DISTDIR)/build.timestamp
+DESKTOP_FILE_IN := resources/linux/$(NAME).desktop
+DESKTOP_FILE_OUT := $(APPDIR)/$(NAME).desktop
+APPRUN_IN := resources/linux/AppRun.sh
+APPRUN_OUT := $(APPDIR)/AppRun
 
 PLATFORM := $(shell uname -s)
 ifneq (,$(findstring MINGW, $(PLATFORM)))
@@ -115,6 +121,28 @@ package-Linux: $(ZIP_FILE_LINUX)
 
 $(ZIP_FILE_LINUX): $(ZIP_FILE)
 	mv "$(ZIP_FILE)" "$(ZIP_FILE_LINUX)"
+
+$(APPIMAGE): $(APPDIR)-dir $(APPDIR)
+	appimagetool $(APPDIR) $(APPIMAGE)
+
+$(APPDIR)-dir:
+	$(RM) -r $(APPDIR)
+	# mkdir -p $(APPDIR)/usr/bin/
+	mkdir -p $(APPDIR)/usr/lib/Subtitles/
+
+
+$(APPDIR): $(BUILD_TIMESTAMP) $(DESKTOP_FILE_OUT) $(APPRUN_OUT)
+	cp -r $(DISTDIR)/Subtitles/* $(APPDIR)/usr/lib/Subtitles
+	chmod +x $(APPDIR)/usr/lib/Subtitles/Subtitles
+	cp $(APPDIR)/usr/lib/Subtitles/Subtitles.png $(APPDIR)/
+
+
+$(APPRUN_OUT): $(APPRUN_IN)
+	cp -r $(APPRUN_IN) $(APPRUN_OUT)
+	chmod +x $(APPRUN_OUT)
+
+$(DESKTOP_FILE_OUT): $(DESKTOP_FILE_IN)
+	cp $(DESKTOP_FILE_IN) $(DESKTOP_FILE_OUT)
 
 
 depends: depends-$(PLATFORM) pip-version Pipfile.lock
