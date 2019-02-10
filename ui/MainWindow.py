@@ -180,8 +180,7 @@ class MainWindow(QMainWindow):
 
         if dlg.exec_():
             filenames = dlg.selectedFiles()
-            for f in filenames:
-                self._processFile(f)
+            self.processVideoFiles(filenames)
 
     @pyqtSlot()
     def showAbout(self):
@@ -354,7 +353,11 @@ class MainWindow(QMainWindow):
             logger.info(f"Retrying task {task}")
             self._rescheduleTask(task)
 
-    def _processFile(self, filePath):
+    @pyqtSlot('QVariantList')
+    def processVideoFiles(self, filePaths: List[str]):
+        # TODO: Handle multiple files
+        filePath = filePaths[0]
+        logger.warn(f"Multiple files not supported, only using the first one: '{filePath}'")
         logger.debug(f"_processFile(): Running worker for filePath '{filePath}'")
         self._schedule("Hash",
                        partial(self._subService.calculate_hash, filePath),
