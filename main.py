@@ -34,6 +34,6 @@ if __name__ == "__main__":
     if len(sys.argv) == 2:
         logger.debug(
             "Processing file from command line: '{}'".format(sys.argv[1]))
-        mainWin._processFile(sys.argv[1])
+        mainWin.processVideoFile(sys.argv[1])
 
     sys.exit(app.exec_())
