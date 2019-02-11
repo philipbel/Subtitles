@@ -18,6 +18,10 @@ from PyQt5.Qt import (
     QSizePolicy,
     Qt,
     QThreadPool,
+    QUrl,
+)
+from PyQt5.QtGui import (
+    QDesktopServices,
 )
 from PyQt5.QtWidgets import (
     QFileDialog,
@@ -42,6 +46,7 @@ from log import logger
 # import rx
 from functools import partial
 from tempfile import NamedTemporaryFile
+from typing import List, Dict
 
 PROG = 'Subtitles'
 
@@ -226,29 +231,6 @@ class MainWindow(QMainWindow):
         code = prefDialog.exec_()
         logger.debug("Preference dialog code: {}".format(code))
 
-    def dragEnterEvent(self, e):
-        logger.debug("mime: {}".format(e.mimeData().formats()))
-        if not e.mimeData().hasUrls():
-            # e.ignore()
-            return
-        for url in e.mimeData().urls():
-            if not url.isLocalFile():
-                # e.ignore()
-                return
-        e.acceptProposedAction()
-
-    def dragMoveEvent(self, e):
-        e.acceptProposedAction()
-
-    def dragLeaveEvent(self, e):
-        e.accept()
-
-    def dropEvent(self, e):
-        e.acceptProposedAction()
-        for url in e.mimeData().urls():
-            filename = url.toLocalFile()
-            self._processFile(filename)
-
     def _onSubtitlesFound(self, filePath, subtitles):
         logger.debug(
             "_onSubtitlesFound: filePath={}, subtitles=\n{}".format(filePath,
@@ -256,13 +238,17 @@ class MainWindow(QMainWindow):
         if not subtitles:
             # TODO: Display a message
             logger.warning("No subtitles found")
-        self._downloadSubtitle(subtitles[0], filePath)
 
-    def _downloadSubtitle(self, subtitle, moviePath):
-        url = subtitle['downloadLink']
+        subtitle = subtitles[0]  # TODO: Handle the other subtitles
+        self._schedule("Download Subtitles",
+                       func=partial(self._downloadSubtitle, subtitle, filePath),
+                       onSuccess=partial(self._onSubtitlesDownloaded, filePath),
+                       onError=self._errorHandler)
+
+    def _downloadSubtitle(self, subtitleDict: Dict, moviePath: str) -> str:
+        url = subtitleDict['downloadLink']
         logger.debug("Downloading subtitle: {}".format(url))
-        r = requests.get(subtitle['downloadLink'], stream=True)
-
+        r = requests.get(url, stream=True)
         try:
             tempfile_unzipped = NamedTemporaryFile(
                 prefix=PROG, delete=False)
@@ -275,15 +261,20 @@ class MainWindow(QMainWindow):
             dirname = path.dirname(moviePath)
             basename = path.splitext(path.basename(moviePath))[0]
             sub_basename = "{}.{}.{}".format(
-                basename, subtitle['language_id'], subtitle['format'])
+                basename, subtitleDict['language_id'], subtitleDict['format'])
             filename = path.join(dirname, sub_basename)
             logger.debug("filename: {}".format(filename))
             os.rename(tempfile_unzipped.name, filename)
+            return filename
         except Exception as e:
             if tempfile_unzipped:
                 os.remove(tempfile_unzipped.name)
             raise e
 
+    def _onSubtitlesDownloaded(self, filePath: str, subtitlePath: str):
+        logger.debug(f"filePath={filePath}, subtitlePath={subtitlePath}")
+        logger.debug(f"Launching video file")
+        QDesktopServices.openUrl(QUrl.fromLocalFile(filePath))
         # TODO: Convert encoding
 
     def _findSubtitles(self, hash: int, filePath: str):
