@@ -44,3 +44,10 @@ curl -s https://packagecloud.io/install/repositories/packpack/packpack/script.de
 ```
 make
 ```
+
+# Tricks
+
+## Pipenv
+
+You can create a `.venv` directory under the project's root directory.  Pipenv will automatically
+use this directory.  Furthermore, you will be able to debug with Code.

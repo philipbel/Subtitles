@@ -1,3 +1,21 @@
+# Copyright (C) 2018--2019 Philip Belemezov.
+# All Rights Reserved.
+#
+# This file is part of Subtitles.
+#
+# Subtitles is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Subtitles is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Subtitles.  If not, see <https://www.gnu.org/licenses/>.
+
 import shutil
 import os
 import gzip
@@ -34,16 +52,13 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-# from PyQt5.QtSvg import QSvgWidget
 from .task import Task
 from .PreferencesDialog import PreferencesDialog
 from .AboutDialog import AboutDialog
-# from pprint import pformat
+from .DndWidget import DndWidget
 from service.OpenSubService import OpenSubService
 from service.EncodingService import EncodingService
 from log import logger
-# import multiprocessing
-# import rx
 from functools import partial
 from tempfile import NamedTemporaryFile
 from typing import List, Dict
@@ -65,12 +80,16 @@ class MainWindow(QMainWindow):
 
     def _initUi(self):
         self._initCentralWidget()
+
+        self._dndWidget = DndWidget(self.centralWidget())
+        self._dndWidget.filesDropped.connect(self.processVideoFiles)
+        self.centralWidget().layout().addWidget(self._dndWidget)
+
         self._initMenu()
 
         self.setWindowTitle(self.tr(PROG))
         self.setUnifiedTitleAndToolBarOnMac(True)
-        self.resize(320, 240)
-        self.setAcceptDrops(True)
+        self.resize(320, 240)  # TODO: Make proportional to the screen size.
 
     def _initMenu(self):
         # mb = self.menuBar()
@@ -153,74 +172,19 @@ class MainWindow(QMainWindow):
 
         if dlg.exec_():
             filenames = dlg.selectedFiles()
-            for f in filenames:
-                self._processFile(f)
+            self.processVideoFiles(filenames)
 
     @pyqtSlot()
     def showAbout(self):
         dlg = AboutDialog(self)
         dlg.exec_()
 
-    @unique
-    class CentralPage(IntEnum):
-        HIDDEN = 0
-        DRAG_FILES = auto()
-        DROP_FILES = auto()
-        HASHING = auto()
-        SEARCHING = auto()
-        DOWNLOADING = auto()
-        LAUNCHING = auto()
-
     def _initCentralWidget(self):
         centralWidget = QWidget(self)
         layout = QVBoxLayout()
-        self._stackLayout = QStackedLayout()
-        layout.addLayout(self._stackLayout)
+        layout.setContentsMargins(0, 0, 0, 0)
         centralWidget.setLayout(layout)
         self.setCentralWidget(centralWidget)
-
-        def createLabel(text: str, parent: QWidget = centralWidget) -> QLabel:
-            label = QLabel(parent)
-            label.setText(text)
-            label.setAlignment(Qt.AlignCenter)
-            return label
-
-        def createPageWithProgressBar(text: str) -> QWidget:
-            page = QWidget(centralWidget)
-            pageLayout = QVBoxLayout()
-            page.setLayout(pageLayout)
-            label = QLabel(page)
-            label.setText(text)
-            label.setAlignment(Qt.AlignCenter)
-            progress = QProgressBar(page)
-            progress.setMinimum(0)
-            progress.setMaximum(0)
-
-            pageLayout.setSpacing(0)
-
-            pageLayout.addStretch()
-            pageLayout.addWidget(label)
-            pageLayout.addWidget(progress)
-            pageLayout.addStretch()
-
-            label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-            progress.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-
-            return page
-
-        self._stackLayout.addWidget(QWidget(centralWidget))
-        self._stackLayout.addWidget(createLabel(self.tr('Drag movies here')))
-        self._stackLayout.addWidget(createLabel(self.tr('Drop the files here')))
-        self._stackLayout.addWidget(createPageWithProgressBar(self.tr('Calculating hash...')))
-        self._stackLayout.addWidget(createPageWithProgressBar(self.tr('Searching for subtitles...')))
-        self._stackLayout.addWidget(createLabel(self.tr('Downloading subtitles...')))
-        self._stackLayout.addWidget(createLabel(self.tr('Launching movie')))
-
-        self.setCentralPage(MainWindow.CentralPage.DRAG_FILES)
-
-    @pyqtSlot(int)
-    def setCentralPage(self, page: CentralPage):
-        self._stackLayout.setCurrentIndex(page.value)
 
     @pyqtSlot()
     def showPreferences(self):
@@ -327,7 +291,11 @@ class MainWindow(QMainWindow):
             logger.info(f"Retrying task {task}")
             self._rescheduleTask(task)
 
-    def _processFile(self, filePath):
+    @pyqtSlot('QVariantList')
+    def processVideoFiles(self, filePaths: List[str]):
+        # TODO: Handle multiple files
+        filePath = filePaths[0]
+        logger.warn(f"Multiple files not supported, only using the first one: '{filePath}'")
         logger.debug(f"_processFile(): Running worker for filePath '{filePath}'")
         self._schedule("Hash",
                        partial(self._subService.calculate_hash, filePath),

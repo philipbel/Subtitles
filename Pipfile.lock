@@ -52,11 +52,11 @@
         },
         "injector": {
             "hashes": [
-                "sha256:1413e2b1dd90c594689bc292bcc02628b969840c1292131455927f292c65e99a",
-                "sha256:d3c5a8d1ace69cfb4f97042a0c6ab50f34e05b7fa1d8a62d541c2f64abed2830"
+                "sha256:6f9602671e19ec8c85e69160b1b5469211a3ce749ccbe5d311e6ae987617ca33",
+                "sha256:78cdce4b89a1635a6314d673a61516ff5af292337285898ffc2f2e72961d6773"
             ],
             "index": "pypi",
-            "version": "==0.14.1"
+            "version": "==0.15.0"
         },
         "macholib": {
             "hashes": [
@@ -253,11 +253,11 @@
         },
         "yapf": {
             "hashes": [
-                "sha256:8aa7f9abdb97b4da4d3227306b88477982daafef0a96cc41639754ca31f46d55",
-                "sha256:f2df5891481f94ddadfbf8ae8ae499080752cfb06005a31bbb102f3012f8b944"
+                "sha256:edb47be90a56ca6f3075fe24f119a22225fbd62c66777b5d3916a7e9e793891b",
+                "sha256:f58069d5e0df60c078f3f986b8a63acfda73aa6ebb7cd423f6eabd1cb06420ba"
             ],
             "index": "pypi",
-            "version": "==0.25.0"
+            "version": "==0.26.0"
         }
     }
 }
