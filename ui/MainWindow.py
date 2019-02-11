@@ -37,7 +37,6 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-# from PyQt5.QtSvg import QSvgWidget
 from .task import Task
 from .PreferencesDialog import PreferencesDialog
 from .AboutDialog import AboutDialog
@@ -69,11 +68,15 @@ class MainWindow(QMainWindow):
 
     def _initUi(self):
         self._initCentralWidget()
+
+        self._dndWidget = DndWidget(self.centralWidget())
+        self._dndWidget.filesDropped.connect(self.processVideoFiles)
+        self.centralWidget().layout().addWidget(self._dndWidget)
+
         self._initMenu()
 
         self.setWindowTitle(self.tr(PROG))
         self.setUnifiedTitleAndToolBarOnMac(True)
-        self.setAcceptDrops(True)
         self.resize(320, 240)  # TODO: Make proportional to the screen size.
         geometry = self.frameGeometry()
         desktopCenter = QDesktopWidget().availableGeometry().center()
@@ -187,66 +190,12 @@ class MainWindow(QMainWindow):
         dlg = AboutDialog(self)
         dlg.exec_()
 
-    @unique
-    class CentralPage(IntEnum):
-        HIDDEN = 0
-        DRAG_FILES = auto()
-        DROP_FILES = auto()
-        HASHING = auto()
-        SEARCHING = auto()
-        DOWNLOADING = auto()
-        LAUNCHING = auto()
-
     def _initCentralWidget(self):
         centralWidget = QWidget(self)
         layout = QVBoxLayout()
-        self._stackLayout = QStackedLayout()
-        layout.addLayout(self._stackLayout)
+        layout.setContentsMargins(0, 0, 0, 0)
         centralWidget.setLayout(layout)
         self.setCentralWidget(centralWidget)
-
-        def createLabel(text: str, parent: QWidget = centralWidget) -> QLabel:
-            label = QLabel(parent)
-            label.setText(text)
-            label.setAlignment(Qt.AlignCenter)
-            return label
-
-        def createPageWithProgressBar(text: str) -> QWidget:
-            page = QWidget(centralWidget)
-            pageLayout = QVBoxLayout()
-            page.setLayout(pageLayout)
-            label = QLabel(page)
-            label.setText(text)
-            label.setAlignment(Qt.AlignCenter)
-            progress = QProgressBar(page)
-            progress.setMinimum(0)
-            progress.setMaximum(0)
-
-            pageLayout.setSpacing(0)
-
-            pageLayout.addStretch()
-            pageLayout.addWidget(label)
-            pageLayout.addWidget(progress)
-            pageLayout.addStretch()
-
-            label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-            progress.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
-
-            return page
-
-        self._stackLayout.addWidget(QWidget(centralWidget))
-        self._stackLayout.addWidget(createLabel(self.tr('Drag movies here')))
-        self._stackLayout.addWidget(createLabel(self.tr('Drop the files here')))
-        self._stackLayout.addWidget(createPageWithProgressBar(self.tr('Calculating hash...')))
-        self._stackLayout.addWidget(createPageWithProgressBar(self.tr('Searching for subtitles...')))
-        self._stackLayout.addWidget(createLabel(self.tr('Downloading subtitles...')))
-        self._stackLayout.addWidget(createLabel(self.tr('Launching movie')))
-
-        self.setCentralPage(MainWindow.CentralPage.DRAG_FILES)
-
-    @pyqtSlot(int)
-    def setCentralPage(self, page: CentralPage):
-        self._stackLayout.setCurrentIndex(page.value)
 
     @pyqtSlot()
     def showPreferences(self):
