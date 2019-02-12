@@ -7,7 +7,7 @@ name = "pypi"
 injector = "*"
 python-opensubtitles = {git = "https://github.com/agonzalezro/python-opensubtitles.git"}
 requests = "*"
-pyinstaller = "*"
+pyinstaller = {git = "https://github.com/pyinstaller/pyinstaller.git"}
 pywin32-ctypes = {version = "*",sys_platform = "== 'win32'"}
 pyside2 = "*"
 
@@ -20,6 +20,8 @@ pyinstaller = "*"
 pypiwin32 = {version = "*",sys_platform = "== 'win32'"}
 pywin32 = {version = "*",sys_platform = "== 'win32'"}
 yapf = "*"
+pyside-type-init = "*"
+pyi-archive-viewer = "*"
 
 [requires]
 python_version = "3.7"
