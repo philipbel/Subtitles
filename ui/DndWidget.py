@@ -20,20 +20,31 @@ from PyQt5.Qt import (
     pyqtProperty,
     pyqtSignal,
     pyqtSlot,
+    QAnimationGroup,
     QApplication,
     QColor,
     QDateTime,
     QElapsedTimer,
     QEasingCurve,
     QPoint,
+    QPointF,
     QPropertyAnimation,
     QRect,
+    QRectF,
+    QObject,
     Qt,
     QTimer,
 )
+from PyQt5.QtCore import (
+    QParallelAnimationGroup,
+)
 from PyQt5.QtWidgets import (
+    QGraphicsEllipseItem,
+    QGraphicsItem,
     QGraphicsLinearLayout,
     QGraphicsScene,
+    QGraphicsSceneDragDropEvent,
+    QGraphicsSceneMouseEvent,
     QGraphicsWidget,
     QGraphicsView,
     QLabel,
@@ -56,6 +67,74 @@ from PyQt5.QtGui import (
     QStaticText,
 )
 from log import logger
+
+
+class GraphicsItemWrapper(QObject):
+    def __init__(self,
+                 cls,
+                 parent: QObject = None):
+        super().__init__(parent)
+        self.item = cls()
+
+
+class EllipseItemWrapper(GraphicsItemWrapper):
+    def __init__(self, center: QPointF, radius: float, parent=None):
+        super().__init__(cls=QGraphicsEllipseItem, parent=parent)
+
+        self._center = center
+        self._radius = radius
+        self._updateGeometry()
+
+    def _updateGeometry(self):
+        c = self._center
+        r = self._radius
+        topLeft = QPointF(c.x() - r, c.y() - r)
+        bottomRight = QPointF(c.x() + r, c.y() + r)
+        rect: QRectF = QRectF(topLeft, bottomRight)
+        self.item.setRect(rect)
+
+    @pyqtProperty(float)
+    def opacity(self) -> float:
+        return self.item.opacity()
+
+    @opacity.setter
+    def opacity(self, value: float):
+        self.item.setOpacity(value)
+
+    @pyqtProperty(float)
+    def radius(self) -> float:
+        return self._radius
+
+    @radius.setter
+    def radius(self, value: float):
+        self._radius = value
+        self._updateGeometry()
+
+
+class Scene(QGraphicsScene):
+    def __init__(self, parent: QObject = None):
+        super().__init__(parent)
+
+    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
+        super().mouseMoveEvent(event)
+        logger.debug(f"pos = {(event.pos().x(), event.pos().y())}"
+                     f", scenePos = {(event.scenePos().x(), event.scenePos().y())}")
+
+    def dragEnterEvent(self, event: QGraphicsSceneDragDropEvent):
+        super().dragEnterEvent(event)
+        logger.debug(f"pos: {event.pos()}, scenePos: {event.scenePos()}")
+
+    def dragMoveEvent(self, event: QGraphicsSceneDragDropEvent):
+        super().dragMoveEvent(event)
+        logger.debug(f"pos: {event.pos()}, scenePos: {event.scenePos()}")
+
+    def dragLeaveEvent(self, event: QGraphicsSceneDragDropEvent):
+        super().dragLeaveEvent(event)
+        logger.debug(f"pos: {event.pos()}, scenePos: {event.scenePos()}")
+
+    def dropEvent(self, event: QGraphicsSceneDragDropEvent):
+        super().dragLeaveEvent(event)
+        logger.debug(f"pos: {event.pos()}, scenePos: {event.scenePos()}")
 
 
 class DndWidget(QGraphicsView):
@@ -83,21 +162,55 @@ class DndWidget(QGraphicsView):
         # self._animationStartTime = 0
         # self._easingCurve = QEasingCurve(QEasingCurve.OutInCubic)
 
-        label = QLabel()
-        label.setText("Drop Files Here")
+        # DEBUG:
+        self.setMouseTracking(True)
 
-        scene = QGraphicsScene()
+        scene = Scene(parent=self)
 
-        sceneLayout = QGraphicsLinearLayout()
-        sceneLayout.addItem(scene.addWidget(label))
+        font: QFont = QFontDatabase.systemFont(QFontDatabase.GeneralFont)
+        font.setPointSize(18)
+        self._textItem = scene.addText(self.tr("Drop Files Here"), font)  # TODO: font
+        palette: QPalette = QApplication.instance().palette()
+        self._textItem.setDefaultTextColor(palette.color(QPalette.Active, QPalette.Dark))
 
-        mainWidget = QGraphicsWidget()
-        mainWidget.setLayout(sceneLayout)
+        textItemAnimation = QPropertyAnimation(self._textItem, b'opacity')
+        textItemAnimation.setStartValue(1.0)
+        textItemAnimation.setEndValue(0.0)
+        textItemAnimation.setDuration(2000)
 
-        scene.addItem(mainWidget)
+        self._outerCircleItem = EllipseItemWrapper(center=QPointF(50, 50), radius=20)
+        scene.addItem(self._outerCircleItem.item)
+
+        # circleOpacityAnimation = QPropertyAnimation(self._outerCircleItem, b'opacity')
+        # circleOpacityAnimation.setStartValue(1.0)
+        # circleOpacityAnimation.setEndValue(0.0)
+        # circleOpacityAnimation.setDuration(1000)
+
+        # circleRadiusAnimation = QPropertyAnimation(self._outerCircleItem, b'radius')
+        # circleRadiusAnimation.setStartValue(0.0)
+        # circleRadiusAnimation.setEndValue(500)
+        # circleRadiusAnimation.setDuration(7000)
+
+        self.animationGroup = QParallelAnimationGroup(self)
+        self.animationGroup.addAnimation(textItemAnimation)
+        # self.animationGroup.addAnimation(circleRadiusAnimation)
+        # self.animationGroup.addAnimation(circleOpacityAnimation)
 
         self.setScene(scene)
 
+    # XXX: Debugging
+    def mousePressEvent(self, event: QMouseEvent):
+        super().mousePressEvent(event)
+        if self.animationGroup.state() != QParallelAnimationGroup.Running:
+            self.animationGroup.start()
+        else:
+            self.animationGroup.stop()
+
+    # XXX: Debugging
+    # def mouseMoveEvent(self, event: QMouseEvent):
+        # super().mouseMoveEvent(event)
+        # logger.debug(f"pos: {event.pos()}")
+        # self._outerCircleItem.item.setPos(self.mapToScene(event.pos()))
 
     @pyqtSlot()
     def startAnimation(self):
