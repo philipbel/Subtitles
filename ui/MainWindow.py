@@ -9,6 +9,7 @@ from PyQt5.Qt import (
     pyqtSlot,
     QAction,
     QApplication,
+    QByteArray,
     QErrorMessage,
     QKeySequence,
     QMainWindow,
@@ -21,9 +22,11 @@ from PyQt5.Qt import (
     QUrl,
 )
 from PyQt5.QtGui import (
+    QCloseEvent,
     QDesktopServices,
 )
 from PyQt5.QtWidgets import (
+    QDesktopWidget,
     QFileDialog,
     QLabel,
     QMenuBar,
@@ -38,12 +41,11 @@ from PyQt5.QtWidgets import (
 from .task import Task
 from .PreferencesDialog import PreferencesDialog
 from .AboutDialog import AboutDialog
-# from pprint import pformat
+from .DndWidget import DndWidget
+from .Settings import Settings
 from service.OpenSubService import OpenSubService
 from service.EncodingService import EncodingService
 from log import logger
-# import multiprocessing
-# import rx
 from functools import partial
 from tempfile import NamedTemporaryFile
 from typing import List, Dict
@@ -63,14 +65,20 @@ class MainWindow(QMainWindow):
 
         self._initUi()
 
+        self._restoreWindowSettings()
+
     def _initUi(self):
         self._initCentralWidget()
         self._initMenu()
 
         self.setWindowTitle(self.tr(PROG))
         self.setUnifiedTitleAndToolBarOnMac(True)
-        self.resize(320, 240)
         self.setAcceptDrops(True)
+        self.resize(320, 240)  # TODO: Make proportional to the screen size.
+        geometry = self.frameGeometry()
+        desktopCenter = QDesktopWidget().availableGeometry().center()
+        geometry.moveCenter(desktopCenter)
+        self.move(geometry.topLeft())
 
     def _initMenu(self):
         # mb = self.menuBar()
@@ -117,6 +125,25 @@ class MainWindow(QMainWindow):
         quitAction.setMenuRole(QAction.QuitRole)
 
         self.setMenuBar(mb)
+
+    def closeEvent(self, event: QCloseEvent):
+        self._saveWindowSettings()
+
+    def _saveWindowSettings(self):
+        settings = Settings()
+        settings.set(Settings.WINDOW_GEOMETRY, self.saveGeometry())
+        settings.set(Settings.WINDOW_STATE, self.saveState())
+
+    def _restoreWindowSettings(self):
+        settings = Settings()
+        geometryValue: QByteArray = settings.get(Settings.WINDOW_GEOMETRY)
+        stateValue: QByteArray = settings.get(Settings.WINDOW_STATE)
+        try:
+            self.restoreGeometry(geometryValue.data())
+            self.restoreState(stateValue)
+        except Exception as e:
+            logger.warn(f"Error restoring window geometry or state: {e}")
+            return
 
     @pyqtSlot()
     def showOpenFile(self):

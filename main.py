@@ -2,9 +2,10 @@
 import sys
 import signal
 import log
-from PyQt5.Qt import PYQT_VERSION_STR
-from PyQt5.Qt import QSettings
-from PyQt5.QtWidgets import QDesktopWidget
+from PyQt5.Qt import (
+    PYQT_VERSION_STR,
+    QSettings,
+)
 from log import logger
 from Application import Application
 from ui.MainWindow import MainWindow
@@ -24,10 +25,6 @@ if __name__ == "__main__":
 
     app = Application(sys.argv)
     mainWin = MainWindow()
-    geometry = mainWin.frameGeometry()
-    desktopCenter = QDesktopWidget().availableGeometry().center()
-    geometry.moveCenter(desktopCenter)
-    mainWin.move(geometry.topLeft())
     mainWin.show()
 
     # TODO: For easier testing
