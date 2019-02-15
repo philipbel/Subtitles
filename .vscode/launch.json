@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Current File",
             "type": "python",
             "request": "launch",
             "stopOnEntry": true,
@@ -14,12 +14,9 @@
             "cwd": "${workspaceFolder}",
             "env": {},
             "envFile": "${workspaceFolder}/.venv",
-            "debugOptions": [
-                "RedirectOutput"
-            ]
         },
         {
-            "name": "Subtitles",
+            "name": "main.py",
             "type": "python",
             "request": "launch",
             "stopOnEntry": false,
@@ -28,13 +25,11 @@
             "cwd": "${workspaceFolder}",
             "env": {},
             "envFile": "${workspaceFolder}/.venv",
-            "debugOptions": [
-                "RedirectOutput"
-            ],
-            "args": []
+            "args": [],
+            "console": "none",
         },
         {
-            "name": "Subtitles Tests",
+            "name": "Tests",
             "type": "python",
             "request": "launch",
             "stopOnEntry": false,
@@ -46,20 +41,7 @@
             ],
             "cwd": "${workspaceFolder}",
             "env": {},
-            "envFile": "${workspaceFolder}/.env",
-            "debugOptions": [
-                "RedirectOutput",
-            ]
-        },
-        {
-            "name": "Python: Attach",
-            "type": "python",
-            "request": "attach",
-            "localRoot": "${workspaceFolder}",
-            "remoteRoot": "${workspaceFolder}",
-            "port": 3000,
-            "secret": "my_secret",
-            "host": "localhost"
+            "envFile": "${workspaceFolder}/.venv",
         },
         {
             "name": "Python: Terminal (integrated)",
@@ -71,8 +53,7 @@
             "cwd": "",
             "console": "integratedTerminal",
             "env": {},
-            "envFile": "${workspaceFolder}/.env",
-            "debugOptions": [],
+            "envFile": "${workspaceFolder}/.venv",
             "internalConsoleOptions": "neverOpen"
         },
         {
@@ -85,23 +66,8 @@
             "cwd": "",
             "console": "externalTerminal",
             "env": {},
-            "envFile": "${workspaceFolder}/.env",
-            "debugOptions": [],
+            "envFile": "${workspaceFolder}/.venv",
             "internalConsoleOptions": "neverOpen"
-        },
-        {
-            "name": "Python: Module",
-            "type": "python",
-            "request": "launch",
-            "stopOnEntry": true,
-            "pythonPath": "${config:python.pythonPath}",
-            "module": "module.name",
-            "cwd": "${workspaceFolder}",
-            "env": {},
-            "envFile": "${workspaceFolder}/.env",
-            "debugOptions": [
-                "RedirectOutput"
-            ]
         },
     ]
 }
