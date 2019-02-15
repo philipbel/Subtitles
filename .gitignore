@@ -106,3 +106,4 @@ package-lock.json
 doc/VERSION.build_host
 doc/VERSION.commit
 doc/VERSION.build_number
+settings.json
