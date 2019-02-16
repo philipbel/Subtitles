@@ -20,6 +20,7 @@ pyinstaller = "*"
 pypiwin32 = {version = "*",sys_platform = "== 'win32'"}
 pywin32 = {version = "*",sys_platform = "== 'win32'"}
 yapf = "*"
+stdeb = "*"
 
 [requires]
 python_version = "3.7"
