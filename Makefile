@@ -112,7 +112,7 @@ $(BUILD_TIMESTAMP):
 		echo "$(GIT_COMMIT)" > doc/VERSION.commit; \
 	fi
 
-	echo "$(shell uname -n -r -m -o)" > doc/VERSION.build_host
+	echo "$(shell uname -n -r -m)" > doc/VERSION.build_host
 
 	if [ -n "${TRAVIS_BUILD_NUMBER}" ]; then \
 		echo "${TRAVIS_BUILD_NUMBER}" > doc/VERSION.build_number; \
