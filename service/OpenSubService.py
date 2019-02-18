@@ -21,6 +21,19 @@ from pythonopensubtitles import opensubtitles
 from log import logger
 
 
+class SubtitleNotFoundError(LookupError):
+    def __init__(self, message: str, hash: str, language: str,):
+        self.message = message
+        self.hash = hash
+        self.language = language
+
+    def __str__(self):
+        return f"SubtitleNotFoundError(" \
+            f"hash={self.hash}, " \
+            f"language='{self.language}'): " \
+            f"{self.message}"
+
+
 class OpenSubService(object):
     def __init__(self):
         super().__init__()
@@ -48,9 +61,10 @@ class OpenSubService(object):
         logger.debug("hash={}".format(hash))
         if not hash:
             raise ValueError('hash is empty')
+        language = 'eng'
         config = {
             # TODO: Adjust for language
-            'sublanguageid': 'eng',
+            'sublanguageid': language,
             'moviehash': hash,
             # 'moviebytesize': f.size
         }
@@ -58,8 +72,7 @@ class OpenSubService(object):
         logger.debug("Calling search_subtitles()")
         data = self._ost.search_subtitles([config])
         if not data:
-            raise Exception("No data")
-            return
+            raise SubtitleNotFoundError(message="No data", hash=hash, language=language)
 
         result = []
         logger.debug("Generating subtitles")

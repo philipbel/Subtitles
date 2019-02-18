@@ -28,7 +28,7 @@ from typing import Callable
 
 
 class TaskSignals(QObject):
-    success = pyqtSignal(object, QRunnable)
+    success = pyqtSignal()
     error = pyqtSignal(Exception, QRunnable)
 
     def __init__(self):
@@ -39,7 +39,7 @@ class Task(QRunnable):
     def __init__(self,
                  func: Callable,
                  name: str,
-                 onSuccess: Callable[[object, QRunnable], None],
+                 onSuccess: Callable[[], None],
                  onError: Callable[[Exception, QRunnable], None] = None):
         super().__init__()
         self.func = func
@@ -65,13 +65,17 @@ class Task(QRunnable):
         try:
             logger.debug(f"Invoking func {self.func}")
             result = self.func()
+            if result:
+                logger.warn(f"Task function returned value '{result}'\n"
+                            f"task: '{self.name}'\n"
+                            f"function: {self.func}")
         except Exception as e:
             logger.error(f"Got exception from func: {e}")
             self._on.error.emit(e, self)
         else:
             logger.debug("func finished")
             try:
-                self._on.success.emit(result, self)
+                self._on.success.emit()
             except Exception as e:
                 logger.error(f"Success function exception: {e}")
                 self._on.error.emit(e, self)

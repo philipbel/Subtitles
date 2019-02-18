@@ -16,19 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with Subtitles.  If not, see <https://www.gnu.org/licenses/>.
 
-import shutil
-import os
-import gzip
 import sys
-import requests
 from enum import IntEnum, auto, unique
-from os import path
 from PyQt5.Qt import (
     pyqtSlot,
     QAction,
     QApplication,
     QByteArray,
     QErrorMessage,
+    QFontDatabase,
     QKeySequence,
     QMainWindow,
     QMenu,
@@ -36,12 +32,9 @@ from PyQt5.Qt import (
     QMimeType,
     QSizePolicy,
     Qt,
-    QThreadPool,
-    QUrl,
 )
 from PyQt5.QtGui import (
     QCloseEvent,
-    QDesktopServices,
 )
 from PyQt5.QtWidgets import (
     QDesktopWidget,
@@ -60,12 +53,12 @@ from .PreferencesDialog import PreferencesDialog
 from .AboutDialog import AboutDialog
 from .DndWidget import DndWidget
 from .Settings import Settings
-from service.OpenSubService import OpenSubService
+from .SubtitleDownloader import SubtitleDownloader
+from service.OpenSubService import OpenSubService, SubtitleNotFoundError
 from service.EncodingService import EncodingService
 from log import logger
 from functools import partial
-from tempfile import NamedTemporaryFile
-from typing import List, Dict
+
 
 PROG = 'Subtitles'
 
@@ -77,8 +70,6 @@ class MainWindow(QMainWindow):
         self._subService = OpenSubService()
         self._encService = EncodingService()
         self._token = None
-
-        self._threadPool = QThreadPool.globalInstance()
 
         self._initUi()
 
@@ -224,109 +215,58 @@ class MainWindow(QMainWindow):
         code = prefDialog.exec_()
         logger.debug("Preference dialog code: {}".format(code))
 
-    def _onSubtitlesFound(self, filePath, subtitles):
-        logger.debug(
-            "_onSubtitlesFound: filePath={}, subtitles=\n{}".format(filePath,
-                                                                    subtitles))
-        if not subtitles:
-            # TODO: Display a message
-            logger.warning("No subtitles found")
-
-        subtitle = subtitles[0]  # TODO: Handle the other subtitles
-        self._schedule("Download Subtitles",
-                       func=partial(self._downloadSubtitle, subtitle, filePath),
-                       onSuccess=partial(self._onSubtitlesDownloaded, filePath),
-                       onError=self._errorHandler)
-
-    def _downloadSubtitle(self, subtitleDict: Dict, moviePath: str) -> str:
-        url = subtitleDict['downloadLink']
-        logger.debug("Downloading subtitle: {}".format(url))
-        r = requests.get(url, stream=True)
-        try:
-            tempfile_unzipped = NamedTemporaryFile(
-                prefix=PROG, delete=False)
-            with NamedTemporaryFile(prefix=PROG) as tempfile:
-                r.raw.decode_content = True
-                shutil.copyfileobj(r.raw, tempfile)
-                with gzip.open(tempfile.name) as gz:
-                    shutil.copyfileobj(gz, tempfile_unzipped)
-
-            dirname = path.dirname(moviePath)
-            basename = path.splitext(path.basename(moviePath))[0]
-            sub_basename = "{}.{}.{}".format(
-                basename, subtitleDict['language_id'], subtitleDict['format'])
-            filename = path.join(dirname, sub_basename)
-            logger.debug("filename: {}".format(filename))
-            os.rename(tempfile_unzipped.name, filename)
-            return filename
-        except Exception as e:
-            if tempfile_unzipped:
-                os.remove(tempfile_unzipped.name)
-            raise e
-
-    def _onSubtitlesDownloaded(self, filePath: str, subtitlePath: str):
-        logger.debug(f"filePath={filePath}, subtitlePath={subtitlePath}")
-        logger.debug(f"Launching video file")
-        QDesktopServices.openUrl(QUrl.fromLocalFile(filePath))
-        # TODO: Convert encoding
-
-    def _findSubtitles(self, hash: int, filePath: str):
-        logger.debug(f"hash={hash}, filePath={filePath}")
-        if not self._token:
-            logger.debug("Not authenticated, performing login()")
-            self._token = self._subService.login()
-            if not self._token:
-                # TODO: Define exception class
-                raise Exception("Unable to login")
-        logger.debug(f"_findSubtitles: token={self._token}")
-        return self._subService.find_by_hash(hash)
-
-    def _onHashCalculated(self, filePath: str, hash: int, task: Task):
-        logger.debug(f"filePath={filePath}, hash={hash}, task={task}")
-
-        self._schedule("Find Subtitles",
-                       func=partial(self._findSubtitles, hash, filePath),
-                       onSuccess=partial(self._onSubtitlesFound, filePath),
-                       onError=self._errorHandler)
-
     def _saveToken(self, token):
         logger.debug("Got token:{}".format(token))
         self._token = token
 
-    def _rescheduleTask(self, task) -> Task:
-        return self._schedule(task.name, task.func, task.onSuccess, task.onError)
+    @pyqtSlot()
+    def handleError(self, error: Exception, task: Task):
+        logger.debug(f"downloader={downloader}, task({type(task)})={task}")
+        shouldRetry = False
+        if isinstance(error, SubtitleNotFoundError):
+            text = self.tr(f"No subtitles found for movie \"{downloader.file_path}\"")
+        else:
+            text = self.tr(f"Error while looking for subtitle for movie "
+                           f"\"{path.basename(downloader.file_path)}\"")
+            shouldRetry = True
 
-    def _schedule(self, name, func, onSuccess, onError=None) -> Task:
-        task = Task(func, name, onSuccess, onError)
-        self._scheduleTask(task)
-        return task
-
-    def _scheduleTask(self, task: Task) -> None:
-        logger.debug(f"ThreadPool starting task {task}")
-        self._threadPool.start(task)
-
-    def _errorHandler(self, e: Exception, task: Task):
         mb = QMessageBox(self)
+        mb.setWindowModality(Qt.WindowModal)
+        mb.setSizeGripEnabled(True)
+        monospaceFont: str = QFontDatabase.systemFont(QFontDatabase.FixedFont).family()
+        mb.setStyleSheet(f"""
+            QMessageBoxDetailsText QTextEdit {{
+                font-weight: normal;
+                font-family: "{monospaceFont}";
+                font-size: 10pt;
+            }}
+            QLabel {{
+                font-weight: normal;
+            }}
+            """)
         mb.setIcon(QMessageBox.Critical)
-        mb.setText(self.tr(f"Error occurred while running '{task.name}''"))
-        mb.setInformativeText(self.tr("Would you like to retry?"))
-        mb.setDetailedText(str(e) + '\n\n' + str(task))
+        mb.setText(text)
+        mb.setDetailedText(f"Task '{task.name}', error:\n{error}\n\n")
         mb.addButton(QMessageBox.Close)
-        mb.addButton(QMessageBox.Retry)
-        mb.setDefaultButton(QMessageBox.Retry)
+        if shouldRetry:
+            mb.setInformativeText(self.tr("Would you like to retry?"))
+            mb.addButton(QMessageBox.Retry)
+            mb.setDefaultButton(QMessageBox.Retry)
         # mb.setWindowModality(Qt.WindowModal)
         response = mb.exec_()
-        if response == QMessageBox.Retry:
+        if shouldRetry and response == QMessageBox.Retry:
             logger.info(f"Retrying task {task}")
             self._rescheduleTask(task)
 
+    @pyqtSlot(str, float)
+    def changeStatus(self, message: str, status: float):
+        logger.info(f"message={message}, status={status:02f}")  # TODO: Show in the UI
+
     @pyqtSlot('QVariantList')
     def processVideoFiles(self, filePaths: List[str]):
-        # TODO: Handle multiple files
-        filePath = filePaths[0]
-        logger.warn(f"Multiple files not supported, only using the first one: '{filePath}'")
-        logger.debug(f"_processFile(): Running worker for filePath '{filePath}'")
-        self._schedule("Hash",
-                       partial(self._subService.calculate_hash, filePath),
-                       onSuccess=partial(self._onHashCalculated, filePath),
-                       onError=self._errorHandler)
+        for filePath in filePaths:
+            language = 'eng'  # TODO: Query
+            downloader = SubtitleDownloader(filePath=filePath, language=language)
+            downloader.onError.connect(self.handleError)
+            downloader.onStatusChanged.connect(self.changeStatus)
+            downloader.download()
